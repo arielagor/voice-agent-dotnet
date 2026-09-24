@@ -271,7 +271,10 @@ public sealed class CallSession(
                 break;
 
             case "input_audio_buffer.committed":
-                Schedule(TimeSpan.FromMilliseconds(options.ForceResponseAfterCommitMs), "force-response");
+                // Carry the response count: the question at the deadline is "was any reply created
+                // since this commit", not "is one active right now". A short reply can start and
+                // finish inside the window, and forcing another then makes the agent talk twice.
+                Schedule(TimeSpan.FromMilliseconds(options.ForceResponseAfterCommitMs), "force-response", _responseCount);
                 break;
 
             case "response.created":
@@ -520,7 +523,7 @@ public sealed class CallSession(
                 await SendModelAsync(RealtimeMessages.IdleFollowup(null));
                 await MaybeFlushBookingAsync("wrap-up window");
                 break;
-            case "force-response" when !_responseActive && _model is { IsOpen: true }:
+            case "force-response" when timer.Generation == _responseCount && !_responseActive && _model is { IsOpen: true }:
                 metrics.Increment("forced_responses");
                 log.LogInformation("[{Call}] no reply after the turn was committed; forcing one", CallId);
                 await SendModelAsync(RealtimeMessages.ResponseCreate());
@@ -544,7 +547,18 @@ public sealed class CallSession(
         metrics.Increment("calls_ended");
         if (Outcome != BookingOutcome.None) metrics.Increment($"booking_{Outcome}");
         if (_toolContext is not null)
-            memory.Record(_from, _toolContext.CallerName, _toolContext.Outcomes, clock.GetUtcNow());
+        {
+            try
+            {
+                memory.Record(_from, _toolContext.CallerName, _toolContext.Outcomes, clock.GetUtcNow());
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+            {
+                // Losing a memory write must never stop a call from tearing down.
+                metrics.Increment("memory_write_failures");
+                log.LogError(ex, "[{Call}] caller memory could not be saved", CallId);
+            }
+        }
 
         double seconds = _connectedAt is { } c ? (clock.GetUtcNow() - c).TotalSeconds : 0;
         log.LogInformation("[{Call}] hangup: {Why} after {Seconds:F1}s, booking {Outcome}", CallId, why, seconds, Outcome);

@@ -21,7 +21,8 @@ builder.Services.AddSingleton(TimeProvider.System);
 // harnesses that layer configuration after Program starts are honoured.
 builder.Services.AddSingleton(_ => new CallTokens(config["Security:CallTokenSecret"] ?? ""));
 builder.Services.AddSingleton<MetricsRegistry>();
-builder.Services.AddSingleton(_ => new CallerMemoryStore(config["Memory:Path"]));
+// A JSON null in appsettings reaches IConfiguration as "", which is not "no path".
+builder.Services.AddSingleton(_ => new CallerMemoryStore(string.IsNullOrWhiteSpace(config["Memory:Path"]) ? null : config["Memory:Path"]));
 
 string DataFile(string name) => Path.Combine(config["Data:Directory"] ?? Path.Combine(AppContext.BaseDirectory, "data"), name);
 builder.Services.AddSingleton(_ => DemoBusiness.Load(DataFile("demo-dealer.json")));

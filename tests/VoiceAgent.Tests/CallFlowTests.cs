@@ -253,6 +253,22 @@ public class CallFlowTests : IAsyncLifetime
         Assert.Equal(1, _factory.Metrics.Count("forced_responses"));
     }
 
+    [Fact]
+    public async Task A_reply_that_finishes_inside_the_force_window_is_not_answered_twice()
+    {
+        var (twilio, model) = await ConnectedCallAsync();
+        await using var _ = twilio;
+
+        model.Push(new { type = "input_audio_buffer.committed" });
+        model.Push(new { type = "response.created" });
+        model.PushAudio(Pcm.Tone24k(440, 2400));
+        model.Push(new { type = "response.done" }); // a short reply, done well inside 700 ms
+
+        await Task.Delay(1200);
+        Assert.Equal(1, model.CountOf("response.create")); // only the greeting's
+        Assert.Equal(0, _factory.Metrics.Count("forced_responses"));
+    }
+
     internal static DateTime NextServiceDay()
     {
         var day = DateTime.Today.AddDays(2);
