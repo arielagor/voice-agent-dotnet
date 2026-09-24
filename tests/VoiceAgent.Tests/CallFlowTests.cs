@@ -90,7 +90,7 @@ public class CallFlowTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Server_detected_barge_in_clears_twilio_and_cancels_the_response()
+    public async Task Server_detected_barge_in_clears_twilio_and_leaves_the_cancel_to_the_provider()
     {
         var (twilio, model) = await ConnectedCallAsync();
         await using var _ = twilio;
@@ -101,8 +101,28 @@ public class CallFlowTests : IAsyncLifetime
         model.Push(new { type = "input_audio_buffer.speech_started" });
 
         await twilio.WaitForAsync("clear");
-        await model.WaitForAsync("response.cancel");
+        await Task.Delay(200);
+        // interrupt_response=true: the provider already cancelled. A second cancel fails on xAI.
+        Assert.Equal(0, model.CountOf("response.cancel"));
         Assert.Equal(1, _factory.Metrics.Count("barge_in_server"));
+    }
+
+    [Fact]
+    public async Task A_reply_created_before_the_commit_is_not_answered_again()
+    {
+        var (twilio, model) = await ConnectedCallAsync();
+        await using var _ = twilio;
+
+        // The order xAI actually uses: the reply starts before the turn is committed.
+        model.Push(new { type = "input_audio_buffer.speech_started" });
+        model.Push(new { type = "response.created" });
+        model.Push(new { type = "input_audio_buffer.speech_stopped" });
+        model.Push(new { type = "input_audio_buffer.committed" });
+        model.PushAudio(Pcm.Tone24k(440, 2400));
+        model.Push(new { type = "response.done" });
+
+        await Task.Delay(1200);
+        Assert.Equal(0, _factory.Metrics.Count("forced_responses"));
     }
 
     [Fact]
@@ -268,6 +288,25 @@ public class CallFlowTests : IAsyncLifetime
         Assert.Equal(1, model.CountOf("response.create")); // only the greeting's
         Assert.Equal(0, _factory.Metrics.Count("forced_responses"));
     }
+
+    [Fact]
+    public async Task A_transcript_revised_three_times_is_one_goodbye_not_three()
+    {
+        var (twilio, model) = await ConnectedCallAsync();
+        await using var _ = twilio;
+
+        // What xAI actually sent on the live call: the same utterance, re-sent as it firmed up.
+        foreach (var text in new[] { "Thanks.", "Thanks, bye.", "Thanks, bye.", "Thanks, bye." })
+            model.Push(new { type = "conversation.item.input_audio_transcription.completed", item_id = "item_7", transcript = text });
+
+        await model.WaitForAsync("session.update", IsIdleDisarm);
+        await Task.Delay(300);
+        Assert.Equal(1, model.Received.Count(e => e.GetProperty("type").GetString() == "session.update" && IsIdleDisarm(e)));
+    }
+
+    private static bool IsIdleDisarm(JsonElement e) =>
+        e.GetProperty("session").TryGetProperty("turn_detection", out var td) &&
+        td.GetProperty("idle_timeout_ms").ValueKind == JsonValueKind.Null;
 
     internal static DateTime NextServiceDay()
     {

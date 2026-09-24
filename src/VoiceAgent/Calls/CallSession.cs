@@ -43,6 +43,11 @@ public sealed class CallSession(
     private readonly Channel<CallEvent> _events = Channel.CreateUnbounded<CallEvent>(new() { SingleReader = true });
     private readonly SemaphoreSlim _toolGate = new(1, 1);
     private readonly List<string> _transcript = [];
+    private readonly Dictionary<string, int> _callerLines = [];
+    private readonly HashSet<string> _goodbyeItems = [];
+    private readonly List<string> _turnMarks = [];
+    private bool _firstAudioThisResponse;
+    private int _responsesAtTurnStart;
     private readonly List<string> _pendingAudio = [];
     private CancellationToken _ct;
 
@@ -235,7 +240,11 @@ public sealed class CallSession(
 
         var turn = _turnVad.Process(frame);
         if (_turnVad.LastFrameVoiced) _lastVoicedAt = now;
-        if (turn == VadEvent.SpeechStarted) _awaitingReply = false;
+        if (turn == VadEvent.SpeechStarted)
+        {
+            _awaitingReply = false;
+            _responsesAtTurnStart = _responseCount;
+        }
         if (turn == VadEvent.SpeechStopped)
         {
             _turnEndedAt = _lastVoicedAt;
@@ -265,22 +274,34 @@ public sealed class CallSession(
                 break;
 
             case "input_audio_buffer.speech_started":
-                if (options.BargeIn != BargeInMode.Local && (_agentAudioQueued || (_responseActive && !_cancelSent)))
-                    await BargeInAsync("server", null);
+                _responsesAtTurnStart = _responseCount;
+                // interrupt_response=true means the provider cancels its own response here, so the
+                // server path only has to silence Twilio. Sending response.cancel as well races the
+                // provider's cancel and fails with "no active response" (seen on the live call).
+                if (options.BargeIn != BargeInMode.Local && _agentAudioQueued)
+                    await BargeInAsync("server", null, cancelResponse: false);
                 await ReengageIfEndingAsync();
                 break;
 
+            case "input_audio_buffer.speech_stopped":
+                MarkTurn("speech_stopped");
+                break;
+
             case "input_audio_buffer.committed":
-                // Carry the response count: the question at the deadline is "was any reply created
-                // since this commit", not "is one active right now". A short reply can start and
-                // finish inside the window, and forcing another then makes the agent talk twice.
-                Schedule(TimeSpan.FromMilliseconds(options.ForceResponseAfterCommitMs), "force-response", _responseCount);
+                MarkTurn("committed");
+                // The deadline asks "has any reply been created since the caller began this turn",
+                // not "is one active right now" and not "since the commit": on xAI the reply is
+                // created ~300 ms BEFORE the commit (measured), and a short reply can finish inside
+                // the window. Either wrong question makes the agent answer twice.
+                Schedule(TimeSpan.FromMilliseconds(options.ForceResponseAfterCommitMs), "force-response");
                 break;
 
             case "response.created":
                 _responseActive = true;
                 _cancelSent = false;
                 _responseCount++;
+                _firstAudioThisResponse = true;
+                MarkTurn("response_created");
                 break;
 
             case "response.output_audio.delta" or "response.audio.delta":
@@ -291,8 +312,12 @@ public sealed class CallSession(
                 _agentTurn += Str(ev, "delta");
                 break;
 
-            case "conversation.item.input_audio_transcription.completed":
-                if (Str(ev, "transcript") is { Length: > 0 } heard) await OnCallerTranscriptAsync(heard);
+            // xAI re-sends the transcript for one utterance several times as it firms up
+            // ("Hi there." -> "Hi there, how much is a" -> the full question), and grok-transcribe
+            // uses ".updated" for the same cumulative text. Both are keyed to one item.
+            case "conversation.item.input_audio_transcription.completed" or "conversation.item.input_audio_transcription.updated":
+                if (Str(ev, "transcript") is { Length: > 0 } heard)
+                    await OnCallerTranscriptAsync(Str(ev, "item_id") ?? $"turn-{_responseCount}", heard);
                 break;
 
             case "response.done":
@@ -304,6 +329,7 @@ public sealed class CallSession(
                 break;
 
             case "response.function_call_arguments.done":
+                MarkTurn("tool_requested");
                 StartTool(Str(ev, "call_id"), Str(ev, "name"), Str(ev, "arguments"));
                 break;
 
@@ -326,6 +352,13 @@ public sealed class CallSession(
         await SendTwilioAsync(TwilioMessages.Media(_streamSid, Convert.ToBase64String(muLaw)));
         _agentAudioQueued = true;
 
+        if (_firstAudioThisResponse)
+        {
+            _firstAudioThisResponse = false;
+            MarkTurn("first_audio");
+            FlushTurnTimeline();
+        }
+
         var now = clock.GetUtcNow();
         if (!_greetingMeasured && _connectedAt is { } started)
         {
@@ -339,14 +372,27 @@ public sealed class CallSession(
         }
     }
 
-    private async Task OnCallerTranscriptAsync(string heard)
+    private async Task OnCallerTranscriptAsync(string itemId, string heard)
     {
-        _transcript.Add("caller: " + heard);
-        if (_ending || !CallerPhrases.IsGoodbye(heard)) return;
+        if (_callerLines.TryGetValue(itemId, out int index))
+        {
+            if (_transcript[index] == "caller: " + heard) return; // a repeat, not new information
+            _transcript[index] = "caller: " + heard;
+        }
+        else
+        {
+            _callerLines[itemId] = _transcript.Count;
+            _transcript.Add("caller: " + heard);
+        }
+        log.LogInformation("[{Call}] caller: {Text}", CallId, Truncate(heard, 200));
+
+        // One goodbye per utterance, however many times its transcript is revised.
+        if (_ending || _goodbyeItems.Contains(itemId) || !CallerPhrases.IsGoodbye(heard)) return;
+        _goodbyeItems.Add(itemId);
 
         log.LogInformation("[{Call}] caller goodbye; ending after the closing reply", CallId);
         _endRequested = true;
-        await SendModelAsync(RealtimeMessages.IdleFollowup(null)); // no "still there?" during the hang-up
+        await SendModelAsync(RealtimeMessages.IdleFollowup(realtime, null)); // no "still there?" during the hang-up
         await MaybeFlushBookingAsync("caller goodbye");
     }
 
@@ -365,6 +411,7 @@ public sealed class CallSession(
         if (turn.Length > 0)
         {
             _transcript.Add("agent: " + turn);
+            log.LogInformation("[{Call}] agent: {Text}", CallId, Truncate(turn, 200));
             if (!_bookingPromised && BookingIntegrity.DetectsCommitment(turn))
             {
                 _bookingPromised = true;
@@ -396,8 +443,9 @@ public sealed class CallSession(
         }
     }
 
-    private async Task BargeInAsync(string source, DateTimeOffset? onsetAt)
+    private async Task BargeInAsync(string source, DateTimeOffset? onsetAt, bool cancelResponse = true)
     {
+        _responsesAtTurnStart = _responseCount;
         if (_streamSid is not null && _agentAudioQueued)
         {
             await SendTwilioAsync(TwilioMessages.Clear(_streamSid));
@@ -406,7 +454,7 @@ public sealed class CallSession(
             if (onsetAt is { } onset)
                 metrics.Observe(LatencyKind.BargeInClear, (clock.GetUtcNow() - onset).TotalMilliseconds);
         }
-        if (_responseActive && !_cancelSent)
+        if (cancelResponse && _responseActive && !_cancelSent)
         {
             _cancelSent = true;
             await SendModelAsync(RealtimeMessages.ResponseCancel());
@@ -420,7 +468,7 @@ public sealed class CallSession(
         if (!_endRequested && !_ending) return;
         _endRequested = _ending = false;
         _endFallbackGeneration++;
-        await SendModelAsync(RealtimeMessages.IdleFollowup(realtime.IdleFollowupMs));
+        await SendModelAsync(RealtimeMessages.IdleFollowup(realtime, realtime.IdleFollowupMs));
     }
 
     // ---------------------------------------------------------------- Tools
@@ -451,6 +499,8 @@ public sealed class CallSession(
     private async Task OnToolDoneAsync(ToolDone done)
     {
         var r = done.Result;
+        log.LogInformation("[{Call}] tool {Tool} -> {Result} ({Ms:F1} ms)", CallId, r.Name,
+            Truncate(r.Output.ToJsonString(), 240), r.Elapsed.TotalMilliseconds);
         metrics.Observe(LatencyKind.Tool, r.Elapsed.TotalMilliseconds);
         metrics.Increment(r.Failed ? $"tool_{r.Name}_failed" : $"tool_{r.Name}_ok");
 
@@ -520,10 +570,10 @@ public sealed class CallSession(
                 if (!_responseActive) await SendModelAsync(RealtimeMessages.ResponseCreate());
                 else _wrapUpPending = true;
                 _endRequested = true;
-                await SendModelAsync(RealtimeMessages.IdleFollowup(null));
+                await SendModelAsync(RealtimeMessages.IdleFollowup(realtime, null));
                 await MaybeFlushBookingAsync("wrap-up window");
                 break;
-            case "force-response" when timer.Generation == _responseCount && !_responseActive && _model is { IsOpen: true }:
+            case "force-response" when _responseCount == _responsesAtTurnStart && !_responseActive && _model is { IsOpen: true }:
                 metrics.Increment("forced_responses");
                 log.LogInformation("[{Call}] no reply after the turn was committed; forcing one", CallId);
                 await SendModelAsync(RealtimeMessages.ResponseCreate());
@@ -562,6 +612,26 @@ public sealed class CallSession(
 
         double seconds = _connectedAt is { } c ? (clock.GetUtcNow() - c).TotalSeconds : 0;
         log.LogInformation("[{Call}] hangup: {Why} after {Seconds:F1}s, booking {Outcome}", CallId, why, seconds, Outcome);
+    }
+
+    // ---------------------------------------------------------------- Turn timeline
+
+    /// <summary>
+    /// Where a reply's latency goes, measured from the caller's last voiced frame at the bridge:
+    /// the model's end-of-turn window (speech_stopped, committed), its time to start a response,
+    /// any tool round trip, and first audio. One log line per reply.
+    /// </summary>
+    private void MarkTurn(string point)
+    {
+        if (_lastVoicedAt is not { } voiced || _turnMarks.Count > 12) return;
+        _turnMarks.Add($"{point}=+{(clock.GetUtcNow() - voiced).TotalMilliseconds:F0}");
+    }
+
+    private void FlushTurnTimeline()
+    {
+        if (_turnMarks.Count > 1)
+            log.LogInformation("[{Call}] turn timeline, ms after caller's last voiced frame: {Marks}", CallId, string.Join(" ", _turnMarks));
+        _turnMarks.Clear();
     }
 
     // ---------------------------------------------------------------- Plumbing

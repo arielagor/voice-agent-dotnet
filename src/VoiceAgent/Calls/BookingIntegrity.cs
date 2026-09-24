@@ -76,11 +76,15 @@ public static partial class BookingIntegrity
 
 public static partial class CallerPhrases
 {
-    /// <summary>Closing phrases, tuned on the live line to avoid firing mid-call.</summary>
+    /// <summary>
+    /// Closing phrases, tuned on the live line to avoid firing mid-call. "That's all" only counts
+    /// when it ends the thought: in a live call through this bridge, "Yes, that's all correct",
+    /// the caller confirming a read-back, matched the older pattern and hung the call up a turn early.
+    /// </summary>
     public static bool IsGoodbye(string transcript) => Goodbye().IsMatch(transcript);
 
     [GeneratedRegex(
-        @"(good\s?bye|\bbye\b|have a (nice|good|great) (day|one|evening|night)|that'?s all( i need| for (me|now))?|that'?s everything|that'?s it for (me|now)|i'?m all set|we'?re all set|nothing else( for (me|now))?|talk (to you )?(soon|later)|take care|appreciate your time)",
+        @"(good\s?bye|\bbye\b|have a (nice|good|great) (day|one|evening|night)|that'?s all(?: i need| for (?:me|now))?(?=\s*(?:[.!,;]|$|thanks|thank you))|that'?s everything(?=\s*(?:[.!,;]|$|thanks|thank you))|that'?s it for (me|now)|i'?m all set|we'?re all set|nothing else( for (me|now))?|talk (to you )?(soon|later)|take care|appreciate your time)",
         RegexOptions.IgnoreCase)]
     private static partial Regex Goodbye();
 }

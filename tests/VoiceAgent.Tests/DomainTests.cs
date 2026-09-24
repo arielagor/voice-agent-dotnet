@@ -49,6 +49,11 @@ public class BookingIntegrityTests
     [InlineData("have a great day", true)]
     [InlineData("I'd like to buy a car", false)]
     [InlineData("can you describe the bypass valve", false)]
+    [InlineData("Yes, that's all correct.", false)] // live call 2026-09-24: hung up a turn early
+    [InlineData("that's all right, go ahead", false)]
+    [InlineData("That's all, thanks", true)]
+    [InlineData("that's all for now", true)]
+    [InlineData("Great, that's all I need. Thanks, bye.", true)]
     public void Goodbye_detection(string heard, bool expected) => Assert.Equal(expected, CallerPhrases.IsGoodbye(heard));
 }
 
@@ -201,6 +206,25 @@ public class SupportingTypesTests
         double[] sorted = [100, 200, 300, 400, 500];
         Assert.Equal(300, MetricsRegistry.Percentile(sorted, 0.5));
         Assert.Equal(480, MetricsRegistry.Percentile(sorted, 0.95), precision: 6);
+    }
+
+    [Fact]
+    public void Disarming_the_idle_follow_up_keeps_the_tuned_end_of_turn_window()
+    {
+        var options = new VoiceAgent.Realtime.RealtimeOptions { SilenceDurationMs = 500, VadThreshold = 0.7 };
+        var td = JsonNode.Parse(VoiceAgent.Realtime.RealtimeMessages.IdleFollowup(options, null))!["session"]!["turn_detection"]!;
+        Assert.Equal(500, td["silence_duration_ms"]!.GetValue<int>());
+        Assert.Equal(0.7, td["threshold"]!.GetValue<double>());
+        Assert.Null(td["idle_timeout_ms"]);
+        Assert.True(td.AsObject().ContainsKey("idle_timeout_ms")); // explicitly null, which is what disarms it
+    }
+
+    [Fact]
+    public void Untuned_sessions_leave_the_provider_defaults_alone()
+    {
+        var td = JsonNode.Parse(VoiceAgent.Realtime.RealtimeMessages.IdleFollowup(new VoiceAgent.Realtime.RealtimeOptions(), 8000))!["session"]!["turn_detection"]!.AsObject();
+        Assert.False(td.ContainsKey("silence_duration_ms"));
+        Assert.False(td.ContainsKey("threshold"));
     }
 
     [Fact]

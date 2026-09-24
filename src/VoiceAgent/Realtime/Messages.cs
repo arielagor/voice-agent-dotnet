@@ -15,13 +15,13 @@ public static class RealtimeMessages
                 ["instructions"] = instructions,
                 ["tools"] = tools,
                 ["input_audio_transcription"] = new JsonObject { ["model"] = options.TranscriptionModel },
-                ["turn_detection"] = TurnDetection(idleFollowupMs),
+                ["turn_detection"] = TurnDetection(options, idleFollowupMs),
                 ["audio"] = new JsonObject
                 {
                     ["input"] = new JsonObject
                     {
                         ["format"] = new JsonObject { ["type"] = "audio/pcm", ["rate"] = 24000 },
-                        ["turn_detection"] = TurnDetection(null, includeIdleKey: false),
+                        ["turn_detection"] = TurnDetection(options, null, includeIdleKey: false),
                     },
                     ["output"] = new JsonObject
                     {
@@ -32,12 +32,16 @@ public static class RealtimeMessages
             },
         }.ToJsonString();
 
-    /// <summary>Arms (a number) or disarms (null) the model's silence follow-up mid-call.</summary>
-    public static string IdleFollowup(int? idleFollowupMs) =>
+    /// <summary>
+    /// Arms (a number) or disarms (null) the model's silence follow-up mid-call. The whole
+    /// turn_detection object is re-sent, tuning included: a partial one would reset the
+    /// end-of-turn window to the provider default halfway through the call.
+    /// </summary>
+    public static string IdleFollowup(RealtimeOptions options, int? idleFollowupMs) =>
         new JsonObject
         {
             ["type"] = "session.update",
-            ["session"] = new JsonObject { ["turn_detection"] = TurnDetection(idleFollowupMs) },
+            ["session"] = new JsonObject { ["turn_detection"] = TurnDetection(options, idleFollowupMs) },
         }.ToJsonString();
 
     public static string AppendAudio(string base64Pcm24k) =>
@@ -72,7 +76,7 @@ public static class RealtimeMessages
         }.ToJsonString();
 
     /// <summary>An explicit null idle_timeout_ms is how the follow-up is disarmed, so it is sent, not omitted.</summary>
-    private static JsonObject TurnDetection(int? idleFollowupMs, bool includeIdleKey = true)
+    private static JsonObject TurnDetection(RealtimeOptions options, int? idleFollowupMs, bool includeIdleKey = true)
     {
         var td = new JsonObject
         {
@@ -80,6 +84,8 @@ public static class RealtimeMessages
             ["create_response"] = true,
             ["interrupt_response"] = true,
         };
+        if (options.SilenceDurationMs is { } silence) td["silence_duration_ms"] = silence;
+        if (options.VadThreshold is { } threshold) td["threshold"] = threshold;
         if (includeIdleKey) td["idle_timeout_ms"] = idleFollowupMs;
         return td;
     }

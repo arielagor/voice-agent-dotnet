@@ -22,6 +22,15 @@ public sealed class RealtimeOptions
 
     /// <summary>Re-engage a caller who goes silent this long after the agent finishes.</summary>
     public int IdleFollowupMs { get; set; } = 8000;
+
+    /// <summary>
+    /// Server VAD end-of-turn window. Null leaves the provider default, which is what the
+    /// production line runs. Set to trade interruption risk against reply latency.
+    /// </summary>
+    public int? SilenceDurationMs { get; set; }
+
+    /// <summary>Server VAD sensitivity, 0.1 to 0.9 on xAI (default 0.85). Null leaves the default.</summary>
+    public double? VadThreshold { get; set; }
 }
 
 public interface IRealtimeConnector

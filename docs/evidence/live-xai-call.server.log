@@ -1,0 +1,92 @@
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5080
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\ariel\.claude\projects\voice-agent-dotnet\src\VoiceAgent
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] stream MZ6f39c6c63f65496c9ed2ce1588118e6d started (inbound)
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: Thanks for calling Sunset Motors. I'm an AI assistant. How can I help you today?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Hi there.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Hi there, how much is a
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Hi there, how much is a synthetic oil change?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Hi there, how much is a synthetic oil change?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Hi there, how much is a synthetic oil change?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool call search_knowledge
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: I'll check that for you.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool search_knowledge -> {"results":[{"id":"oil-change","title":"Oil change pricing","text":"A conventional oil change is $49.95 and a full synthetic oil change is $89.95. Both include a tire rotation and a multi-point inspection and take about 45 minutes.","score" (14.4 ms)
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: A full synthetic oil change is eighty-nine ninety-five. It includes a tire rotation and multi-point inspection and takes about forty-five minutes. Anything else?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Okay.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Okay, could I bring my
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Okay, could I bring my car in for one tomorrow?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Okay, could I bring my car in for one tomorrow morning?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Okay, could I bring my car in for one tomorrow morning?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool call check_availability
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: I can check availability for tomorrow.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool check_availability -> {"date":"2026-09-25","open_slots":["2026-09-25T07:30","2026-09-25T08:00","2026-09-25T08:30","2026-09-25T09:00","2026-09-25T09:30","2026-09-25T10:00","2026-09-25T10:30","2026-09-25T11:00"],"more_available":true} (16.8 ms)
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: Tomorrow morning has openings starting at seven thirty. Would seven thirty, eight, or eight thirty work for you?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Ray.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1 0 5
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1 0 5 5 5
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1 0 5 5 5 0 1 4 2
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1 0 5 5 5 0 1 4 2
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Nine o'clock works. My name is Jordan Reyes, and my number is 3 1 0 5 5 5 0 1 4 2
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: Let me read that back. Jordan Reyes, callback number 310-555-0142, for a synthetic oil change at nine AM tomorrow. Is that all correct?
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Yes.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Yes, that's all correct.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller goodbye; ending after the closing reply
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Yes, that's all correct.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller goodbye; ending after the closing reply
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller: Yes, that's all correct.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] caller goodbye; ending after the closing reply
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool call book_appointment
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] agent: Great, I'll get that booked for you.
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] tool book_appointment -> {"success":true,"eventId":"apt_5e4ebfde7ed3","department":"service","start":"2026-09-25T09:00"} (7.8 ms)
+info: VoiceAgent.Calls.CallSession[0]
+      [fdae6085] hangup: caller said goodbye after 69.9s, booking Committed
