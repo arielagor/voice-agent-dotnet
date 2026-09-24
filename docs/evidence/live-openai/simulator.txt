@@ -1,35 +1,11 @@
-Traceback (most recent call last):
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
-    return await fut
-           ^^^^^^^^^
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\locks.py", line 212, in wait
-    await fut
-asyncio.exceptions.CancelledError
+greeting: none within 10 s; the caller speaks first
+01-oil-change: agent audio 2750 ms after the caller finished
+02-availability: agent audio 1423 ms after the caller finished
+03-details: agent audio 1455 ms after the caller finished
+04-confirm: agent audio 1630 ms after the caller finished
+05-goodbye: agent audio 1466 ms after the caller finished
+call ended by the bridge (goodbye flow)
+recording: C:\Users\ariel\.claude\projects\voice-agent-dotnet\docs\evidence\live-openai/call.wav
 
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 385, in <module>
-    main()
-  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 381, in main
-    asyncio.run(run_script(args) if args.script else run(args))
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
-    return runner.run(main)
-           ^^^^^^^^^^^^^^^^
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
-    return self._loop.run_until_complete(task)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
-    return future.result()
-           ^^^^^^^^^^^^^^^
-  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 337, in run_script
-    greeting = await call.wait_first_media(timeout=15)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 139, in wait_first_media
-    await asyncio.wait_for(self.media_event.wait(), timeout)
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 519, in wait_for
-    async with timeouts.timeout(timeout):
-               ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
-    raise TimeoutError from exc_val
-TimeoutError
+reply latency over 5 turns: median 1466 ms, min 1423 ms, max 2750 ms
+bridge /metrics: {"counters": {"barge_in_local": 1, "booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "model_errors": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 12459.5, "p95": 12459.5, "max": 12459.5}, "TurnResponse": {"n": 5, "p50": 1471.8, "p95": 1568.4, "max": 1589.5}, "BargeInClear": {"n": 1, "p50": 12.2, "p95": 12.2, "max": 12.2}, "Tool": {"n": 3, "p50": 12.2, "p95": 14, "max": 14.2}}}

@@ -1,6 +1,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Channels;
 
 namespace VoiceAgent.Realtime;
 
@@ -8,46 +9,66 @@ namespace VoiceAgent.Realtime;
 /// Writes every provider event, both directions, to a JSONL file with audio payloads elided.
 /// For discovering what an under-documented API actually sends, and for proving what a call did.
 /// Enabled with Realtime:TracePath; off by default because transcripts are personal data.
+///
+/// Writes go through a queue drained by one background task. The first version appended to the
+/// file synchronously per event, ~38 ms each on Windows, at 50 audio frames a second: the call
+/// loop fell 3.5 s behind and the tracer inflated the very latencies it was there to explain.
 /// </summary>
-public sealed class TracingChannel(IMessageChannel inner, string path) : IMessageChannel
+public sealed class TracingChannel : IMessageChannel
 {
-    private readonly object _lock = new();
+    private readonly IMessageChannel _inner;
+    private readonly Channel<string> _lines = Channel.CreateUnbounded<string>(new() { SingleReader = true });
+    private readonly Task _writer;
     private readonly DateTimeOffset _start = DateTimeOffset.UtcNow;
 
-    public bool IsOpen => inner.IsOpen;
+    public TracingChannel(IMessageChannel inner, string path)
+    {
+        _inner = inner;
+        _writer = Task.Run(async () =>
+        {
+            await using var file = new StreamWriter(path, append: true);
+            await foreach (var line in _lines.Reader.ReadAllAsync())
+            {
+                await file.WriteLineAsync(line);
+                if (_lines.Reader.Count == 0) await file.FlushAsync();
+            }
+        });
+    }
+
+    public bool IsOpen => _inner.IsOpen;
 
     public Task SendAsync(string json, CancellationToken ct)
     {
-        Write("out", json);
-        return inner.SendAsync(json, ct);
+        Enqueue("out", json);
+        return _inner.SendAsync(json, ct);
     }
 
     public async IAsyncEnumerable<string> ReadAsync([EnumeratorCancellation] CancellationToken ct)
     {
-        await foreach (var message in inner.ReadAsync(ct))
+        await foreach (var message in _inner.ReadAsync(ct))
         {
-            Write("in", message);
+            Enqueue("in", message);
             yield return message;
         }
     }
 
-    public Task CloseAsync(string reason, CancellationToken ct) => inner.CloseAsync(reason, ct);
+    public Task CloseAsync(string reason, CancellationToken ct) => _inner.CloseAsync(reason, ct);
 
-    public ValueTask DisposeAsync() => inner.DisposeAsync();
-
-    private void Write(string direction, string json)
+    public async ValueTask DisposeAsync()
     {
+        _lines.Writer.TryComplete();
+        await Task.WhenAny(_writer, Task.Delay(2000));
+        await _inner.DisposeAsync();
+    }
+
+    private void Enqueue(string direction, string json)
+    {
+        double ms = Math.Round((DateTimeOffset.UtcNow - _start).TotalMilliseconds);
         JsonNode? node;
         try { node = JsonNode.Parse(json); }
         catch (JsonException) { node = JsonValue.Create(json.Length > 200 ? json[..200] : json); }
         Elide(node);
-        var line = new JsonObject
-        {
-            ["ms"] = Math.Round((DateTimeOffset.UtcNow - _start).TotalMilliseconds),
-            ["dir"] = direction,
-            ["msg"] = node,
-        }.ToJsonString();
-        lock (_lock) File.AppendAllText(path, line + Environment.NewLine);
+        _lines.Writer.TryWrite(new JsonObject { ["ms"] = ms, ["dir"] = direction, ["msg"] = node }.ToJsonString());
     }
 
     /// <summary>Audio is replaced by its length so a trace stays readable and small.</summary>

@@ -49,6 +49,7 @@ public sealed class CallSession(
     private bool _firstAudioThisResponse;
     private int _responsesAtTurnStart;
     private const double AudibleDbfs = -45.0;
+    private (string Item, string Text) _lastCallerItem = ("", "");
     private readonly List<string> _pendingAudio = [];
     private CancellationToken _ct;
 
@@ -303,6 +304,10 @@ public sealed class CallSession(
                 _responseCount++;
                 _firstAudioThisResponse = true;
                 MarkTurn("response_created");
+                // The model is answering, so the caller's turn is over: its latest transcript is
+                // as final as it gets, and "... that's all" at the very end now means goodbye.
+                if (_lastCallerItem is var (item, text) && text.Length > 0)
+                    await MaybeGoodbyeAsync(item, text, final: true);
                 break;
 
             case "response.output_audio.delta" or "response.audio.delta":
@@ -332,6 +337,12 @@ public sealed class CallSession(
             case "response.function_call_arguments.done":
                 MarkTurn("tool_requested");
                 StartTool(Str(ev, "call_id"), Str(ev, "name"), Str(ev, "arguments"));
+                break;
+
+            case "error" when json.Contains("response_cancel_not_active", StringComparison.Ordinal) ||
+                              json.Contains("no active response", StringComparison.Ordinal):
+                // A local barge-in's cancel lost the race to the provider's own interrupt. Benign.
+                metrics.Increment("cancel_races");
                 break;
 
             case "error":
@@ -391,9 +402,17 @@ public sealed class CallSession(
             _transcript.Add("caller: " + heard);
         }
         log.LogInformation("[{Call}] caller: {Text}", CallId, Truncate(heard, 200));
+        _lastCallerItem = (itemId, heard);
 
-        // One goodbye per utterance, however many times its transcript is revised.
-        if (_ending || _goodbyeItems.Contains(itemId) || !CallerPhrases.IsGoodbye(heard)) return;
+        // Mid-stream the text may be cut anywhere, so only unambiguous closings count here; the
+        // end-of-thought forms are checked once the caller's turn is over (see response.created).
+        await MaybeGoodbyeAsync(itemId, heard, final: false);
+    }
+
+    /// <summary>One goodbye per utterance, however many times its transcript is revised.</summary>
+    private async Task MaybeGoodbyeAsync(string itemId, string heard, bool final)
+    {
+        if (_ending || _goodbyeItems.Contains(itemId) || !CallerPhrases.IsGoodbye(heard, final)) return;
         _goodbyeItems.Add(itemId);
 
         log.LogInformation("[{Call}] caller goodbye; ending after the closing reply", CallId);

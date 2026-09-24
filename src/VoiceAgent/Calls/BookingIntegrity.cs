@@ -80,11 +80,26 @@ public static partial class CallerPhrases
     /// Closing phrases, tuned on the live line to avoid firing mid-call. "That's all" only counts
     /// when it ends the thought: in a live call through this bridge, "Yes, that's all correct",
     /// the caller confirming a read-back, matched the older pattern and hung the call up a turn early.
+    ///
+    /// <paramref name="final"/> matters because transcripts stream. A partial that happens to stop
+    /// at "Yes, that's all" is indistinguishable from a goodbye by text alone; it caused exactly
+    /// that on a live GPT-Live call. So end-of-text only counts as the end of the thought once the
+    /// caller's turn is over; mid-stream, "that's all" needs its own punctuation or a thanks.
     /// </summary>
-    public static bool IsGoodbye(string transcript) => Goodbye().IsMatch(transcript);
+    public static bool IsGoodbye(string transcript, bool final = true) =>
+        final ? GoodbyeFinal().IsMatch(transcript) : GoodbyePartial().IsMatch(transcript);
+
+    private const string Closings =
+        @"good\s?bye|\bbye\b|have a (nice|good|great) (day|one|evening|night)|that'?s it for (me|now)|i'?m all set|we'?re all set|" +
+        @"nothing else( for (me|now))?|talk (to you )?(soon|later)|take care|appreciate your time";
 
     [GeneratedRegex(
-        @"(good\s?bye|\bbye\b|have a (nice|good|great) (day|one|evening|night)|that'?s all(?: i need| for (?:me|now))?(?=\s*(?:[.!,;]|$|thanks|thank you))|that'?s everything(?=\s*(?:[.!,;]|$|thanks|thank you))|that'?s it for (me|now)|i'?m all set|we'?re all set|nothing else( for (me|now))?|talk (to you )?(soon|later)|take care|appreciate your time)",
+        "(" + Closings + @"|that'?s all(?: i need| for (?:me|now))?(?=\s*(?:[.!,;]|$|thanks|thank you))|that'?s everything(?=\s*(?:[.!,;]|$|thanks|thank you)))",
         RegexOptions.IgnoreCase)]
-    private static partial Regex Goodbye();
+    private static partial Regex GoodbyeFinal();
+
+    [GeneratedRegex(
+        "(" + Closings + @"|that'?s all(?: i need| for (?:me|now))?(?=\s*(?:[.!,;]|thanks|thank you))|that'?s everything(?=\s*(?:[.!,;]|thanks|thank you)))",
+        RegexOptions.IgnoreCase)]
+    private static partial Regex GoodbyePartial();
 }

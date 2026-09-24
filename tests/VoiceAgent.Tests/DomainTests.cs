@@ -55,6 +55,18 @@ public class BookingIntegrityTests
     [InlineData("that's all for now", true)]
     [InlineData("Great, that's all I need. Thanks, bye.", true)]
     public void Goodbye_detection(string heard, bool expected) => Assert.Equal(expected, CallerPhrases.IsGoodbye(heard));
+
+    [Theory]
+    [InlineData("Yes, that's all", false)]     // live GPT-Live call: a partial of "Yes, that's all correct"
+    [InlineData("Great, that's all I", false)]
+    [InlineData("that's all, thanks", true)]
+    [InlineData("okay, bye", true)]
+    public void Streaming_partials_need_an_unambiguous_closing(string partial, bool expected) =>
+        Assert.Equal(expected, CallerPhrases.IsGoodbye(partial, final: false));
+
+    [Fact]
+    public void The_same_text_is_a_goodbye_once_the_turn_is_over() =>
+        Assert.True(CallerPhrases.IsGoodbye("Okay, that's all", final: true));
 }
 
 public class KnowledgeIndexTests

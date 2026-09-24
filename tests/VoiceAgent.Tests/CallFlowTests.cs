@@ -304,6 +304,37 @@ public class CallFlowTests : IAsyncLifetime
         Assert.Equal(1, model.Received.Count(e => e.GetProperty("type").GetString() == "session.update" && IsIdleDisarm(e)));
     }
 
+    [Fact]
+    public async Task A_partial_ending_in_thats_all_does_not_hang_up_mid_sentence()
+    {
+        var (twilio, model) = await ConnectedCallAsync();
+        await using var _ = twilio;
+
+        foreach (var text in new[] { "Yes", "Yes, that's", "Yes, that's all", "Yes, that's all correct" })
+            model.Push(new { type = "conversation.item.input_audio_transcription.completed", item_id = "item_c", transcript = text });
+        model.Push(new { type = "response.created" });
+        model.PushAudio(Pcm.Tone24k(440, 2400));
+        model.Push(new { type = "response.done" });
+
+        await Task.Delay(400);
+        Assert.DoesNotContain(twilio.Received, e => e.GetProperty("event").GetString() == "mark" &&
+            e.GetProperty("mark").GetProperty("name").GetString() == "end-call");
+    }
+
+    [Fact]
+    public async Task A_turn_that_ends_on_thats_all_is_a_goodbye_once_the_agent_answers()
+    {
+        var (twilio, model) = await ConnectedCallAsync();
+        await using var _ = twilio;
+
+        model.Push(new { type = "conversation.item.input_audio_transcription.completed", item_id = "item_d", transcript = "Okay, that's all" });
+        model.Push(new { type = "response.created" });
+        model.PushAudio(Pcm.Tone24k(440, 2400));
+        model.Push(new { type = "response.done" });
+
+        await twilio.WaitForAsync("mark", e => e.GetProperty("mark").GetProperty("name").GetString() == "end-call");
+    }
+
     private static bool IsIdleDisarm(JsonElement e) =>
         e.GetProperty("session").TryGetProperty("turn_detection", out var td) &&
         td.GetProperty("idle_timeout_ms").ValueKind == JsonValueKind.Null;
