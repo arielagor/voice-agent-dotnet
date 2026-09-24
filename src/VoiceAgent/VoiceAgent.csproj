@@ -5,12 +5,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <InvariantGlobalization>true</InvariantGlobalization>
     <RootNamespace>VoiceAgent</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="VoiceAgent.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\data\**\*" LinkBase="data" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

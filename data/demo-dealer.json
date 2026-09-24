@@ -1,0 +1,26 @@
+{
+  "_note": "Fictional demo business and accounts. No real customer data. Content lives in this file, not in code.",
+  "businessName": "Sunset Motors",
+  "timeZone": "America/Los_Angeles",
+  "slotMinutes": 30,
+  "departments": {
+    "sales": { "open": "09:00", "close": "19:00", "days": [1, 2, 3, 4, 5, 6] },
+    "service": { "open": "07:30", "close": "17:00", "days": [1, 2, 3, 4, 5] }
+  },
+  "knowledge": [
+    { "id": "hours", "title": "Hours", "text": "The sales floor is open Monday through Saturday, 9 AM to 7 PM. The service department is open Monday through Friday, 7:30 AM to 5 PM. Both are closed Sunday." },
+    { "id": "oil-change", "title": "Oil change pricing", "text": "A conventional oil change is $49.95 and a full synthetic oil change is $89.95. Both include a tire rotation and a multi-point inspection and take about 45 minutes." },
+    { "id": "trade-in", "title": "Trade-ins", "text": "We accept trade-ins on any make or model. Bring the title or payoff information, the registration, and all keys. An appraisal takes about 20 minutes and the offer is good for 7 days." },
+    { "id": "financing-documents", "title": "Documents needed for financing", "text": "To apply for financing bring a valid driver's license, proof of income such as two recent pay stubs, proof of residence such as a utility bill, and proof of insurance." },
+    { "id": "credit", "title": "Credit requirements", "text": "We work with buyers across the credit spectrum, including first-time buyers and buyers rebuilding credit. Approval and rate depend on the lender's review of the application." },
+    { "id": "payment-methods", "title": "Making a payment", "text": "Loan payments can be made online, by phone, by mail, or in person at the dealership. Debit card, bank transfer, and cashier's check are accepted. Cash is accepted in person only." },
+    { "id": "late-fees", "title": "Late payments", "text": "A payment is late if it is received more than 10 days after the due date. A late fee of 5 percent of the payment amount applies. Customers who expect to be late can arrange a promise to pay by phone." },
+    { "id": "due-date-change", "title": "Changing a due date", "text": "Customers may request a one-time due date change of up to 15 days after six on-time payments. Requests are reviewed by the servicing team within two business days." },
+    { "id": "warranty", "title": "Warranty", "text": "Every certified pre-owned vehicle includes a 90-day, 3,000-mile limited powertrain warranty. Extended service contracts are available at purchase." },
+    { "id": "loaner", "title": "Loaner cars and shuttle", "text": "A free shuttle runs within 10 miles for service customers. Loaner vehicles are available for repairs expected to take more than one day, by reservation." }
+  ],
+  "accounts": [
+    { "id": "SM-10482", "last4": "4821", "zip": "90010", "firstName": "Jordan", "amountDue": 412.37, "dueDate": "2026-09-28", "daysPastDue": 0 },
+    { "id": "SM-20931", "last4": "7730", "zip": "91436", "firstName": "Sam", "amountDue": 389.00, "dueDate": "2026-09-12", "daysPastDue": 11 }
+  ]
+}

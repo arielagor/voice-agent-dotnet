@@ -66,6 +66,9 @@ public sealed class EnergyVad
     public double NoiseFloorDbfs => _floorDbfs;
     public double LastFrameDbfs { get; private set; } = double.NegativeInfinity;
 
+    /// <summary>Whether the most recent frame cleared the threshold, before debounce or hangover.</summary>
+    public bool LastFrameVoiced { get; private set; }
+
     /// <summary>Elapsed audio time, derived from frames processed rather than the wall clock.</summary>
     public TimeSpan AudioTime => TimeSpan.FromSeconds((double)_framesSeen * _options.FrameSamples / _options.SampleRate);
 
@@ -83,6 +86,7 @@ public sealed class EnergyVad
         _framesSeen++;
 
         bool voiced = level > _options.AbsoluteFloorDbfs && level - _floorDbfs >= _options.SnrThresholdDb;
+        LastFrameVoiced = voiced;
 
         if (voiced)
         {
