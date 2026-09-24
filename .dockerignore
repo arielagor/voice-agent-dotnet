@@ -1,0 +1,6 @@
+**/bin/
+**/obj/
+.git/
+docs/evidence/
+tools/caller-audio/*.mp3
+**/__pycache__/

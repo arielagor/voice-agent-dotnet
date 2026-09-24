@@ -1,0 +1,82 @@
+13:43:05.561 info: Microsoft.Hosting.Lifetime[14] Now listening on: http://localhost:5080
+13:43:05.569 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+13:43:05.570 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+13:43:05.570 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\Users\ariel\.claude\projects\voice-agent-dotnet\src\VoiceAgent
+13:43:08.160 info: VoiceAgent.Calls.CallSession[0] [5064f55d] stream MZ54e221ec68804fccb33cbca153e284ec started (inbound)
+13:43:14.885 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: Thanks for calling Sunset Motors. I'm the AI assistant. How can I help you today?
+13:43:41.728 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi
+13:43:42.129 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there
+13:43:42.543 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How
+13:43:42.657 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much
+13:43:42.889 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much is
+13:43:43.074 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much is a
+13:43:43.689 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much is a synthetic
+13:43:43.848 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much is a synthetic oil
+13:43:44.628 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Hi there. How much is a synthetic oil change
+13:43:45.041 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: response_created=+1586 first_audio=+1589
+13:43:45.550 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool call search_knowledge
+13:43:45.564 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool search_knowledge -> {"results":[{"id":"oil-change","title":"Oil change pricing","text":"A conventional oil change is $49.95 and a full synthetic oil change is $89.95. Both include a tire rotation and a multi-point inspection and take about 45 minutes.","score" (11.8 ms)
+13:43:47.118 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: Sure, let me check that. A
+13:43:47.428 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: tool_requested=+2097 response_created=+3975 first_audio=+3975
+13:43:55.721 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: full synthetic oil change is eighty nine ninety five, and it includes a tire rotation and multi-point inspection, and it takes about forty five minutes.
+13:44:16.642 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay
+13:44:17.121 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I
+13:44:17.268 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring
+13:44:17.451 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my
+13:44:17.860 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car
+13:44:18.085 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car in
+13:44:18.253 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car in for
+13:44:18.398 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car in for one
+13:44:18.735 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car in for one tomorrow
+13:44:19.091 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Okay Could I bring my car in for one tomorrow morning
+13:44:19.861 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: response_created=+1656 first_audio=+1656
+13:44:19.965 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool call check_availability
+13:44:19.976 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool check_availability -> {"date":"2026-09-25","open_slots":["2026-09-25T07:30","2026-09-25T08:00","2026-09-25T08:30","2026-09-25T09:00","2026-09-25T09:30","2026-09-25T10:00","2026-09-25T10:30","2026-09-25T11:00"],"more_available":true} (11.3 ms)
+13:44:21.098 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: I'll take a look.
+13:44:22.799 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: tool_requested=+1760 response_created=+4594 first_audio=+4594
+13:44:27.906 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: We have openings at seven thirty, eight, or eight thirty, tomorrow morning. What works best?
+13:44:51.364 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o
+13:44:51.506 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock
+13:44:52.113 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works
+13:44:52.538 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My
+13:44:52.733 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name
+13:44:52.905 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is
+13:44:53.293 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan
+13:44:53.721 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes
+13:44:54.133 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and
+13:44:54.289 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my
+13:44:54.734 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number
+13:44:54.882 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is
+13:44:55.345 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three
+13:44:55.544 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one
+13:44:55.710 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero
+13:44:56.697 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five
+13:44:57.518 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five five five
+13:44:58.141 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five five five, zero
+13:44:58.356 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five five five, zero one
+13:44:58.515 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five five five, zero one four
+13:44:59.052 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Nine o'clock works. My name is Jordan Reyes, and my number is three one zero, five five five, zero one four two
+13:44:59.436 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: response_created=+1442 first_audio=+1443
+13:45:08.961 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: Great. I'll check nine. So that's nine tomorrow morning, for Jordan Reyes, callback three one zero, five five five, zero one four two. Is that right?
+13:45:12.868 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Yes
+13:45:13.021 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Yes, that's
+13:45:13.140 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Yes, that's all
+13:45:13.756 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Yes, that's all correct
+13:45:14.592 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: response_created=+1827 first_audio=+1828
+13:45:14.877 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool call book_appointment
+13:45:14.880 info: VoiceAgent.Calls.CallSession[0] [5064f55d] tool book_appointment -> {"success":true,"eventId":"apt_3bc8634ed41e","department":"service","start":"2026-09-25T09:00"} (3.1 ms)
+13:45:16.563 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: Perfect. Hang on a second.
+13:45:16.881 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: tool_requested=+2113 response_created=+4117 first_audio=+4117
+13:45:30.059 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: Okay, you're booked for a full synthetic oil change tomorrow, Friday, September twenty-fifth at nine in the morning, under Jordan Reyes, callback three one zero, five five five, zero one four two.
+13:45:30.059 info: VoiceAgent.Calls.CallSession[0] [5064f55d] booking promised in speech
+13:45:45.999 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Great
+13:45:46.318 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Great. That's
+13:45:46.506 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Great. That's all I
+13:45:46.904 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Great. That's all I need
+13:45:47.819 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: Great. That's all I need. Thanks
+13:45:47.819 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller goodbye; ending after the closing reply
+13:45:48.127 info: VoiceAgent.Calls.CallSession[0] [5064f55d] turn timeline, ms after caller's last voiced frame: response_created=+1016 first_audio=+1016
+13:45:48.183 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller: . Bye
+13:45:48.183 info: VoiceAgent.Calls.CallSession[0] [5064f55d] caller goodbye; ending after the closing reply
+13:45:51.303 info: VoiceAgent.Calls.CallSession[0] [5064f55d] agent: You're all set. Thanks for calling Sunset Motors.
+13:45:51.705 info: VoiceAgent.Calls.CallSession[0] [5064f55d] hangup: caller said goodbye after 164.0s, booking Committed

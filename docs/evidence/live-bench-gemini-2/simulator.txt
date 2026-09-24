@@ -1,0 +1,11 @@
+greeting: first audio 1305 ms after stream start
+01-oil-change: agent audio 2089 ms after the caller finished
+02-availability: agent audio 1876 ms after the caller finished
+03-details: agent audio 1476 ms after the caller finished
+04-confirm: agent audio 2101 ms after the caller finished
+05-goodbye: agent audio 1173 ms after the caller finished
+call ended by the bridge (goodbye flow)
+recording: C:\Users\ariel\.claude\projects\voice-agent-dotnet\docs\evidence\live-bench-gemini-2/call.wav
+
+reply latency over 5 turns: median 1876 ms, min 1173 ms, max 2101 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 1274, "p95": 1274, "max": 1274}, "TurnResponse": {"n": 5, "p50": 1865.5, "p95": 2072, "max": 2079.2}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 9.8, "p95": 11.2, "max": 11.3}}}

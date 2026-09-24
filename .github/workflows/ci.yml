@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  dotnet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test --no-build -c Release --logger "console;verbosity=normal"
+
+  simulator:
+    # End to end with no API key: the bridge on the scripted model, driven by the Python caller.
+    runs-on: ubuntu-latest
+    needs: dotnet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install websockets==16.1
+      - run: dotnet build src/VoiceAgent -c Release
+      - name: run the bridge and a simulated call
+        run: |
+          ASPNETCORE_ENVIRONMENT=Development dotnet run --project src/VoiceAgent -c Release --no-build --urls http://localhost:5080 &
+          for i in $(seq 1 60); do curl -sf http://localhost:5080/healthz && break; sleep 1; done
+          python tools/simulate_call.py --turns 2 | tee sim.txt
+          grep -q "Twilio buffer cleared" sim.txt

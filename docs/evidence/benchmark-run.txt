@@ -1,0 +1,89 @@
+=== xai run 1 ===
+
+greeting: first audio 5023 ms after stream start
+01-oil-change: agent audio 1482 ms after the caller finished
+02-availability: agent audio 1444 ms after the caller finished
+03-details: agent audio 4586 ms after the caller finished
+04-confirm: agent audio 1310 ms after the caller finished
+05-goodbye: agent audio 1294 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1444 ms, min 1294 ms, max 4586 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 4987.8, "p95": 4987.8, "max": 4987.8}, "TurnResponse": {"n": 5, "p50": 1436.2, "p95": 3951.8, "max": 4568.6}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 12.2, "p95": 13.7, "max": 13.9}}}
+=== openai run 1 ===
+greeting: first audio 2918 ms after stream start
+01-oil-change: agent audio 1764 ms after the caller finished
+02-availability: agent audio 1711 ms after the caller finished
+03-details: agent audio 2138 ms after the caller finished
+04-confirm: agent audio 1947 ms after the caller finished
+05-goodbye: agent audio 1551 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1764 ms, min 1551 ms, max 2138 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 2882.4, "p95": 2882.4, "max": 2882.4}, "TurnResponse": {"n": 5, "p50": 1772.4, "p95": 2075.4, "max": 2117.4}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 15.6, "p95": 15.6, "max": 15.6}}}
+=== gpt-live run 1 ===
+greeting: first audio 2830 ms after stream start
+01-oil-change: agent audio 1617 ms after the caller finished
+02-availability: agent audio 1649 ms after the caller finished
+03-details: agent audio 1589 ms after the caller finished
+04-confirm: agent audio 2786 ms after the caller finished
+05-goodbye: agent audio 1507 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1617 ms, min 1507 ms, max 2786 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 2783.5, "p95": 2783.5, "max": 2783.5}, "TurnResponse": {"n": 5, "p50": 1589.1, "p95": 1793.4, "max": 1827.6}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 11.3, "p95": 11.8, "max": 11.8}}}
+=== gemini run 1 ===
+greeting: first audio 1964 ms after stream start
+01-oil-change: agent audio 1878 ms after the caller finished
+02-availability: agent audio 2134 ms after the caller finished
+03-details: agent audio 1618 ms after the caller finished
+04-confirm: agent audio 2269 ms after the caller finished
+05-goodbye: agent audio 1192 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1878 ms, min 1192 ms, max 2269 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 1918.7, "p95": 1918.7, "max": 1918.7}, "TurnResponse": {"n": 5, "p50": 1880, "p95": 2216.9, "max": 2238.1}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 15.1, "p95": 18.4, "max": 18.7}}}
+=== xai run 2 ===
+greeting: first audio 2189 ms after stream start
+01-oil-change: agent audio 1177 ms after the caller finished
+02-availability: agent audio 1277 ms after the caller finished
+03-details: agent audio 1650 ms after the caller finished
+04-confirm: agent audio 1410 ms after the caller finished
+05-goodbye: agent audio 1247 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1277 ms, min 1177 ms, max 1650 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 2158.9, "p95": 2158.9, "max": 2158.9}, "TurnResponse": {"n": 5, "p50": 1287.2, "p95": 1603, "max": 1666.3}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 13.9, "p95": 16.1, "max": 16.3}}}
+=== openai run 2 ===
+greeting: first audio 2476 ms after stream start
+01-oil-change: agent audio 1329 ms after the caller finished
+02-availability: agent audio 1334 ms after the caller finished
+03-details: agent audio 1726 ms after the caller finished
+04-confirm: agent audio 1671 ms after the caller finished
+05-goodbye: agent audio 1354 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1354 ms, min 1329 ms, max 1726 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 2182.1, "p95": 2182.1, "max": 2182.1}, "TurnResponse": {"n": 5, "p50": 1353, "p95": 1714.1, "max": 1735.3}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 17.8, "p95": 21.2, "max": 21.5}}}
+=== gpt-live run 2 ===
+greeting: first audio 2203 ms after stream start
+01-oil-change: agent audio 1468 ms after the caller finished
+02-availability: agent audio 1827 ms after the caller finished
+03-details: agent audio 1510 ms after the caller finished
+04-confirm: agent audio 1831 ms after the caller finished
+05-goodbye: agent audio 1219 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1510 ms, min 1219 ms, max 1831 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 2135.2, "p95": 2135.2, "max": 2135.2}, "TurnResponse": {"n": 5, "p50": 1488, "p95": 1799.4, "max": 1811.7}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 12.9, "p95": 17.5, "max": 18}}}
+=== gemini run 2 ===
+greeting: first audio 1305 ms after stream start
+01-oil-change: agent audio 2089 ms after the caller finished
+02-availability: agent audio 1876 ms after the caller finished
+03-details: agent audio 1476 ms after the caller finished
+04-confirm: agent audio 2101 ms after the caller finished
+05-goodbye: agent audio 1173 ms after the caller finished
+call ended by the bridge (goodbye flow)
+reply latency over 5 turns: median 1876 ms, min 1173 ms, max 2101 ms
+bridge /metrics: {"counters": {"booking_Committed": 1, "calls_ended": 1, "calls_started": 1, "tool_book_appointment_ok": 1, "tool_check_availability_ok": 1, "tool_search_knowledge_ok": 1}, "latency_ms": {"GreetingFirstAudio": {"n": 1, "p50": 1274, "p95": 1274, "max": 1274}, "TurnResponse": {"n": 5, "p50": 1865.5, "p95": 2072, "max": 2079.2}, "BargeInClear": {"n": 0}, "Tool": {"n": 3, "p50": 9.8, "p95": 11.2, "max": 11.3}}}
+provider   runs turns  median    p90    min    max  greet  booked readback goodbye errors
+gemini        2    10    1877   2134   1173   2269   1634     2/2      2/2     2/2      0
+gpt-live      2    10    1603   1831   1219   2786   2516     2/2      0/2     2/2      0
+openai        2    10    1691   1947   1329   2138   2697     2/2      0/2     2/2      0
+xai           2    10    1360   1650   1177   4586   3606     2/2      2/2     2/2      0
+
+written: C:\Users\ariel\.claude\projects\voice-agent-dotnet\docs\evidence\benchmark.json
+

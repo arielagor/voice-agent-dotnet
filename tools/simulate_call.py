@@ -337,11 +337,13 @@ async def run_script(args: argparse.Namespace) -> None:
         receiver = asyncio.create_task(call.receive())
         await call.send({"event": "connected", "protocol": "Call", "version": "1.0.0"})
         t_start = time.perf_counter()
+        params = {"t": call_token(args.secret, call.call_sid), "dir": "inbound", "from": args.caller}
+        if args.params:  # a different bridge's own stream parameters, e.g. the Node line's ctok
+            params = json.loads(args.params)
         await call.send({
             "event": "start",
             "streamSid": call.stream_sid,
-            "start": {"streamSid": call.stream_sid, "callSid": call.call_sid, "customParameters": {
-                "t": call_token(args.secret, call.call_sid), "dir": "inbound", "from": args.caller}},
+            "start": {"streamSid": call.stream_sid, "callSid": call.call_sid, "customParameters": params},
         })
         sender = asyncio.create_task(call.sender())
 
@@ -379,8 +381,9 @@ async def run_script(args: argparse.Namespace) -> None:
     if latencies:
         print(f"\nreply latency over {len(latencies)} turns: median {statistics.median(latencies):.0f} ms, "
               f"min {min(latencies):.0f} ms, max {max(latencies):.0f} ms")
-    with urllib.request.urlopen(args.base + "/metrics", timeout=5) as r:
-        print("bridge /metrics:", json.dumps(json.load(r)))
+    if not args.no_metrics:
+        with urllib.request.urlopen(args.base + "/metrics", timeout=5) as r:
+            print("bridge /metrics:", json.dumps(json.load(r)))
 
 
 def main() -> None:
@@ -391,6 +394,8 @@ def main() -> None:
     p.add_argument("--turns", type=int, default=3)
     p.add_argument("--script", help="directory of .ulaw caller clips (see make_caller_audio.py); plays them in order")
     p.add_argument("--record", default="call-recording.wav", help="with --script: where to write a mixed recording")
+    p.add_argument("--params", help="with --script: JSON customParameters for the start event (overrides t/dir/from)")
+    p.add_argument("--no-metrics", action="store_true", help="skip fetching /metrics (bridges without that endpoint)")
     args = p.parse_args()
     asyncio.run(run_script(args) if args.script else run(args))
 

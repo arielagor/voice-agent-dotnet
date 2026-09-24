@@ -1,0 +1,30 @@
+13:45:58.886 info: Microsoft.Hosting.Lifetime[14] Now listening on: http://localhost:5080
+13:45:58.899 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+13:45:58.900 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+13:45:58.900 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\Users\ariel\.claude\projects\voice-agent-dotnet\src\VoiceAgent
+13:46:01.854 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] stream MZ84bb27e2c70249eabd769d1f084ffe1c started (inbound)
+13:46:07.706 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: Thanks for calling Sunset Motors. I'm the AI assistant. How can I help you today?
+13:46:12.194 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller: Hi there, how much is a synthetic oil change?
+13:46:12.201 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool call search_knowledge
+13:46:12.223 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool search_knowledge -> {"results":[{"id":"oil-change","title":"Oil change pricing","text":"A conventional oil change is $49.95 and a full synthetic oil change is $89.95. Both include a tire rotation and a multi-point inspection and take about 45 minutes.","score" (18.7 ms)
+13:46:12.831 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] turn timeline, ms after caller's last voiced frame: tool_requested=+1249 response_created=+1840 first_audio=+1880
+13:46:20.414 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: A full synthetic oil change is eighty-nine dollars and ninety-five cents, which also includes a tire rotation and a multi-point inspection.
+13:46:25.096 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller: Could I bring my car in for one tomorrow morning?
+13:46:25.170 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool call check_availability
+13:46:25.185 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool check_availability -> {"date":"2026-09-25","open_slots":["2026-09-25T07:30","2026-09-25T08:00","2026-09-25T08:30","2026-09-25T09:00","2026-09-25T09:30","2026-09-25T10:00","2026-09-25T10:30","2026-09-25T11:00"],"more_available":true} (15.1 ms)
+13:46:26.016 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] turn timeline, ms after caller's last voiced frame: tool_requested=+1286 response_created=+2132 first_audio=+2132
+13:46:32.080 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: We have openings tomorrow morning at seven-thirty, eight-thirty, or nine-thirty. Which of those works best for you?
+13:46:41.735 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller: 9:00 works. My name is Jordan Reyes and my number is 310-555-0142.
+13:46:42.168 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] turn timeline, ms after caller's last voiced frame: response_created=+1617 first_audio=+1618
+13:46:51.527 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: Before we book, just to confirm: I have your name as Jordan Reyes and your callback number as 310-555-0142. Is that correct?
+13:46:54.983 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller: Yes, that's all correct.
+13:46:54.983 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool call book_appointment
+13:46:54.989 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] tool book_appointment -> {"success":true,"eventId":"apt_907540925855","department":"service","start":"2026-09-25T09:00"} (5.8 ms)
+13:46:55.901 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] turn timeline, ms after caller's last voiced frame: tool_requested=+1320 response_created=+2164 first_audio=+2238
+13:46:59.199 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: Great, I've booked your appointment for tomorrow at 9:00 AM.
+13:46:59.199 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] booking promised in speech
+13:47:03.294 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller: Great, that's all I need. Thanks. Bye.
+13:47:03.294 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] caller goodbye; ending after the closing reply
+13:47:03.296 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] turn timeline, ms after caller's last voiced frame: response_created=+1193 first_audio=+1193
+13:47:06.412 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] agent: You're very welcome. We look forward to seeing you tomorrow.
+13:47:06.416 info: VoiceAgent.Calls.CallSession[0] [b4b54e58] hangup: caller said goodbye after 65.2s, booking Committed

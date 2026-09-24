@@ -28,10 +28,19 @@ def parse_run(run_dir: Path) -> dict:
     greeting = re.search(r"greeting: first audio (\d+) ms", sim)
     tools = re.findall(r"tool call (\w+)", log)
     agent_lines = re.findall(r"\] agent: (.*)", log)
+    # Read-back = before book_appointment ran, the agent said the caller's name AND number back,
+    # and the caller then confirmed. Judged from the order of events, not from stock phrases:
+    # a phrase list scored a model that plainly read the details back as 0/2.
     booked_after_readback = False
     if "book_appointment" in tools:
-        before = log.split("tool call book_appointment")[0]
-        booked_after_readback = bool(re.search(r"agent: .*(read that back|to confirm|is that (all )?correct|shall i book)", before, re.I))
+        before = log.split("tool call book_appointment")[0].splitlines()
+        number = re.compile(r"(310|three[ -]?one[ -]?(oh|zero)).*(555|five[ -]?five[ -]?five)", re.I)
+        for i, line in enumerate(before):
+            if "] agent:" in line and "jordan" in line.lower() and number.search(line):
+                booked_after_readback = any("] caller:" in later and re.search(r"\b(yes|correct|right)\b", later, re.I)
+                                            for later in before[i + 1:])
+                if booked_after_readback:
+                    break
     return {
         "turns": turns,
         "greeting": int(greeting.group(1)) if greeting else None,
