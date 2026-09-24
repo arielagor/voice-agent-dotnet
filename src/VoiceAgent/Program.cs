@@ -37,13 +37,7 @@ builder.Services.AddSingleton<IVoiceTool, VerifyAccountTool>();
 builder.Services.AddSingleton<IVoiceTool, RecordPromiseToPayTool>();
 builder.Services.AddSingleton<ToolRegistry>();
 
-builder.Services.AddSingleton<IRealtimeConnector>(sp =>
-{
-    var rt = sp.GetRequiredService<RealtimeOptions>();
-    return rt.Provider.Equals("scripted", StringComparison.OrdinalIgnoreCase)
-        ? new ScriptedRealtimeConnector()
-        : new WebSocketRealtimeConnector(rt);
-});
+builder.Services.AddSingleton(sp => WebSocketRealtimeConnector.For(sp.GetRequiredService<RealtimeOptions>()));
 builder.Services.AddHttpClient<TwilioRestClient>();
 
 var app = builder.Build();

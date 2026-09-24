@@ -65,7 +65,8 @@ public sealed class WebSocketMessageChannel(WebSocket socket) : IMessageChannel
             message.Write(buffer.AsSpan(0, result.Count));
             if (!result.EndOfMessage) continue;
 
-            if (result.MessageType == WebSocketMessageType.Text)
+            // Gemini Live sends its JSON in binary frames; everything else uses text frames.
+            if (result.MessageType is WebSocketMessageType.Text or WebSocketMessageType.Binary)
                 yield return Encoding.UTF8.GetString(message.WrittenSpan);
             message.Clear();
         }

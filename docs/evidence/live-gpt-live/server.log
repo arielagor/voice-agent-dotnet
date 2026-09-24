@@ -1,0 +1,115 @@
+13:25:46.735 info: Microsoft.Hosting.Lifetime[14] Now listening on: http://localhost:5080
+13:25:46.743 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+13:25:46.744 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+13:25:46.744 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\Users\ariel\.claude\projects\voice-agent-dotnet\src\VoiceAgent
+13:25:48.775 info: VoiceAgent.Calls.CallSession[0] [becd5815] stream MZca6acd650cdc47c1bcfff51fd4526f88 started (inbound)
+13:26:25.963 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Thanks for calling Sunset Motors, this is our AI assistant. How can I help today?
+13:26:25.974 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Hi
+13:26:26.084 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+21 first_audio=+22
+13:26:26.388 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: there
+13:26:26.390 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+38 first_audio=+38
+13:26:27.061 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: How much
+13:26:27.165 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+23 first_audio=+23
+13:26:27.211 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: is a
+13:26:27.257 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+14 first_audio=+14
+13:26:28.076 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: synthetic
+13:26:28.092 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: synthetic oil
+13:26:28.178 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+736 first_audio=+736
+13:26:28.428 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: change
+13:26:28.484 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1042 first_audio=+1042
+13:26:30.021 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool call search_knowledge
+13:26:30.041 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool search_knowledge -> {"results":[{"id":"oil-change","title":"Oil change pricing","text":"A conventional oil change is $49.95 and a full synthetic oil change is $89.95. Both include a tire rotation and a multi-point inspection and take about 45 minutes.","score" (16.6 ms)
+13:26:59.265 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Let me pull that up. A full synthetic oil change is 89 dollars 95 cents, includes a tire rotation, a multi-point inspection, and takes about 45 minutes.
+13:26:59.265 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Okay
+13:26:59.266 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: tool_requested=+2579 response_created=+1 first_audio=+1
+13:26:59.853 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: , could I
+13:26:59.906 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+24 first_audio=+24
+13:27:00.180 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: bring my
+13:27:00.190 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+11 first_audio=+11
+13:27:00.672 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: car
+13:27:00.753 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+15 first_audio=+15
+13:27:00.774 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: in
+13:27:00.859 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+19 first_audio=+19
+13:27:00.961 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: for
+13:27:01.062 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+141 first_audio=+142
+13:27:01.152 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: one
+13:27:01.255 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+335 first_audio=+335
+13:27:01.555 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: tomorrow
+13:27:01.585 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+665 first_audio=+665
+13:27:01.933 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: morning
+13:27:01.986 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1065 first_audio=+1065
+13:27:03.275 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool call check_availability
+13:27:03.288 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool check_availability -> {"date":"2026-09-25","open_slots":["2026-09-25T07:30","2026-09-25T08:00","2026-09-25T08:30","2026-09-25T09:00","2026-09-25T09:30","2026-09-25T10:00","2026-09-25T10:30","2026-09-25T11:00"],"more_available":true} (12.9 ms)
+13:27:32.796 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Sure, lemme check. Yes, tomorrow morning, September 25th, we have openings from 7:30 through 11. What time works best?
+13:27:32.796 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Nine o
+13:27:32.893 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: tool_requested=+2355 response_created=+3 first_audio=+4
+13:27:32.967 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: 'clock
+13:27:32.992 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+24 first_audio=+24
+13:27:33.556 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: works
+13:27:33.610 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+14 first_audio=+14
+13:27:33.994 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: . My
+13:27:34.093 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+4 first_audio=+4
+13:27:34.199 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: name
+13:27:34.299 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+157 first_audio=+157
+13:27:34.354 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: is
+13:27:34.396 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+254 first_audio=+254
+13:27:34.767 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Jordan
+13:27:34.795 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+28 first_audio=+28
+13:27:35.164 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Reyes
+13:27:35.192 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+30 first_audio=+30
+13:27:35.592 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: , and
+13:27:35.593 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1 first_audio=+1
+13:27:35.760 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: my
+13:27:35.792 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+30 first_audio=+30
+13:27:36.197 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: number
+13:27:36.346 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+5 first_audio=+5
+13:27:36.402 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: is
+13:27:36.491 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+12 first_audio=+12
+13:27:36.566 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: three
+13:27:36.591 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+99 first_audio=+99
+13:27:36.975 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: one
+13:27:36.996 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+19 first_audio=+20
+13:27:37.372 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: zero
+13:27:37.402 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+30 first_audio=+31
+13:27:37.958 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: five
+13:27:37.996 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+193 first_audio=+193
+13:27:38.340 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: five
+13:27:38.396 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+23 first_audio=+23
+13:27:38.944 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: five
+13:27:38.991 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+22 first_audio=+22
+13:27:39.326 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: zero
+13:27:39.397 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+10 first_audio=+10
+13:27:39.802 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: one
+13:27:39.892 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+506 first_audio=+506
+13:27:39.959 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: four
+13:27:40.006 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+619 first_audio=+620
+13:27:40.355 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: two
+13:27:40.392 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1005 first_audio=+1005
+13:28:11.150 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Checking that. Okay, just to confirm, Jordan Reyes, three one zero, five five five, zero one four two, for a service appointment tomorrow at 9 a.m. Shall I book that?
+13:28:11.150 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Yes
+13:28:11.192 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+22 first_audio=+22
+13:28:11.593 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: , that’s
+13:28:11.779 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+429 first_audio=+429
+13:28:11.779 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: all
+13:28:11.787 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+437 first_audio=+437
+13:28:12.343 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: correct
+13:28:12.405 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1055 first_audio=+1055
+13:28:13.392 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool call book_appointment
+13:28:13.395 info: VoiceAgent.Calls.CallSession[0] [becd5815] tool book_appointment -> {"success":true,"eventId":"apt_65fe2cf883b7","department":"service","start":"2026-09-25T09:00"} (2.4 ms)
+13:28:43.208 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Booking it now. You're all set, Jordan. Your synthetic oil change is booked for tomorrow, September 25th, at nine a.m. We'll see you then.
+13:28:43.209 info: VoiceAgent.Calls.CallSession[0] [becd5815] booking promised in speech
+13:28:43.209 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: Great
+13:28:43.251 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: tool_requested=+2042 response_created=+48 first_audio=+48
+13:28:43.669 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: , that’s
+13:28:43.764 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+57 first_audio=+57
+13:28:43.802 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: all I
+13:28:43.874 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+109 first_audio=+109
+13:28:44.190 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: need
+13:28:44.408 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+81 first_audio=+81
+13:28:45.111 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: . Thanks
+13:28:45.249 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+922 first_audio=+923
+13:28:45.545 info: VoiceAgent.Calls.CallSession[0] [becd5815] agent: Bye!
+13:28:45.545 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller: , bye
+13:28:45.546 info: VoiceAgent.Calls.CallSession[0] [becd5815] caller goodbye; ending after the closing reply
+13:28:45.644 info: VoiceAgent.Calls.CallSession[0] [becd5815] turn timeline, ms after caller's last voiced frame: response_created=+1220 first_audio=+1317
+13:29:37.279 info: VoiceAgent.Calls.CallSession[0] [becd5815] hangup: caller hung up after 229.8s, booking Committed

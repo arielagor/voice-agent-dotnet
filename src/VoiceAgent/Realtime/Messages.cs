@@ -6,6 +6,42 @@ namespace VoiceAgent.Realtime;
 public static class RealtimeMessages
 {
     public static string SessionUpdate(RealtimeOptions options, string instructions, JsonArray tools, int? idleFollowupMs) =>
+        IsOpenAi(options) ? OpenAiSessionUpdate(options, instructions, tools, idleFollowupMs) : XaiSessionUpdate(options, instructions, tools, idleFollowupMs);
+
+    private static bool IsOpenAi(RealtimeOptions options) => options.Provider.Equals("openai", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// OpenAI's GA shape: a typed session with everything audio under audio.input / audio.output.
+    /// xAI accepts the older flat fields as well; OpenAI rejects them as unknown parameters.
+    /// </summary>
+    private static string OpenAiSessionUpdate(RealtimeOptions options, string instructions, JsonArray tools, int? idleFollowupMs) =>
+        new JsonObject
+        {
+            ["type"] = "session.update",
+            ["session"] = new JsonObject
+            {
+                ["type"] = "realtime",
+                ["instructions"] = instructions,
+                ["tools"] = tools,
+                ["audio"] = new JsonObject
+                {
+                    ["input"] = new JsonObject
+                    {
+                        ["format"] = new JsonObject { ["type"] = "audio/pcm", ["rate"] = 24000 },
+                        ["transcription"] = new JsonObject { ["model"] = options.TranscriptionModel },
+                        ["turn_detection"] = TurnDetection(options, idleFollowupMs),
+                    },
+                    ["output"] = new JsonObject
+                    {
+                        ["format"] = new JsonObject { ["type"] = "audio/pcm", ["rate"] = 24000 },
+                        ["voice"] = options.Voice,
+                        ["speed"] = options.SpeechSpeed,
+                    },
+                },
+            },
+        }.ToJsonString();
+
+    private static string XaiSessionUpdate(RealtimeOptions options, string instructions, JsonArray tools, int? idleFollowupMs) =>
         new JsonObject
         {
             ["type"] = "session.update",
@@ -41,7 +77,13 @@ public static class RealtimeMessages
         new JsonObject
         {
             ["type"] = "session.update",
-            ["session"] = new JsonObject { ["turn_detection"] = TurnDetection(options, idleFollowupMs) },
+            ["session"] = IsOpenAi(options)
+                ? new JsonObject
+                {
+                    ["type"] = "realtime",
+                    ["audio"] = new JsonObject { ["input"] = new JsonObject { ["turn_detection"] = TurnDetection(options, idleFollowupMs) } },
+                }
+                : new JsonObject { ["turn_detection"] = TurnDetection(options, idleFollowupMs) },
         }.ToJsonString();
 
     public static string AppendAudio(string base64Pcm24k) =>

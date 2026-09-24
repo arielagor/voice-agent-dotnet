@@ -4,7 +4,10 @@ namespace VoiceAgent.Realtime;
 
 public sealed class RealtimeOptions
 {
-    /// <summary>"xai" (or any OpenAI-compatible realtime endpoint via Url), or "scripted" for local runs.</summary>
+    /// <summary>
+    /// "xai", "openai" (OpenAI's GA realtime API), "gemini" (Gemini Live, via a protocol adapter),
+    /// or "scripted" for local runs with no key. The call loop is the same for all of them.
+    /// </summary>
     public string Provider { get; set; } = "xai";
     public string Url { get; set; } = "wss://api.x.ai/v1/realtime";
 
@@ -31,6 +34,12 @@ public sealed class RealtimeOptions
 
     /// <summary>Server VAD sensitivity, 0.1 to 0.9 on xAI (default 0.85). Null leaves the default.</summary>
     public double? VadThreshold { get; set; }
+
+    /// <summary>GPT-Live only: the backend Responses model the voice layer delegates tools to.</summary>
+    public string DelegateModel { get; set; } = "gpt-5.6-luna";
+
+    /// <summary>When set, every provider event is written here as JSONL (audio elided).</summary>
+    public string? TracePath { get; set; }
 }
 
 public interface IRealtimeConnector
@@ -50,6 +59,16 @@ public sealed class WebSocketRealtimeConnector(RealtimeOptions options) : IRealt
         socket.Options.KeepAliveInterval = TimeSpan.FromSeconds(15);
         var uri = new Uri($"{options.Url}?model={Uri.EscapeDataString(options.Model)}");
         await socket.ConnectAsync(uri, ct);
-        return new WebSocketMessageChannel(socket);
+        IMessageChannel wire = new WebSocketMessageChannel(socket);
+        return string.IsNullOrWhiteSpace(options.TracePath) ? wire : new TracingChannel(wire, options.TracePath);
     }
+
+    public static IRealtimeConnector For(RealtimeOptions options) => options.Provider.ToLowerInvariant() switch
+    {
+        "scripted" => new ScriptedRealtimeConnector(),
+        "gemini" => new GeminiLiveConnector(options),
+        "gpt-live" => new GptLiveConnector(options),
+        "xai" or "openai" => new WebSocketRealtimeConnector(options),
+        var other => throw new InvalidOperationException($"Unknown Realtime:Provider '{other}'."),
+    };
 }

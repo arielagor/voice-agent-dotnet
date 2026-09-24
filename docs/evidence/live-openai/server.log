@@ -1,0 +1,7 @@
+13:20:21.467 info: Microsoft.Hosting.Lifetime[14] Now listening on: http://localhost:5080
+13:20:21.476 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+13:20:21.477 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+13:20:21.477 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\Users\ariel\.claude\projects\voice-agent-dotnet\src\VoiceAgent
+13:20:23.212 info: VoiceAgent.Calls.CallSession[0] [599ad910] stream MZ3742cf3e64fc4394a5ebed968b20f103 started (inbound)
+13:20:23.218 warn: VoiceAgent.Calls.CallSession[0] [599ad910] model error: {"type":"error","event_id":"event_ERkDW3gkVcyQStUBwcvpu","error":{"type":"invalid_request_error","code":"invalid_model","message":"Model \"gpt-live-1\" is not supported in realtime mode. See https://platform.openai.com/docs/models for a list of supported models.","param":null,"event_id":null}}
+13:20:23.224 info: VoiceAgent.Calls.CallSession[0] [599ad910] hangup: model socket closed after 1.3s, booking None

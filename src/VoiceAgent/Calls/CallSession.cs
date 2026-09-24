@@ -48,6 +48,7 @@ public sealed class CallSession(
     private readonly List<string> _turnMarks = [];
     private bool _firstAudioThisResponse;
     private int _responsesAtTurnStart;
+    private const double AudibleDbfs = -45.0;
     private readonly List<string> _pendingAudio = [];
     private CancellationToken _ct;
 
@@ -350,6 +351,11 @@ public sealed class CallSession(
         var muLaw = new byte[pcm8.Length];
         MuLaw.Encode(pcm8, muLaw);
         await SendTwilioAsync(TwilioMessages.Media(_streamSid, Convert.ToBase64String(muLaw)));
+
+        // Only audible audio counts as the agent talking. A full-duplex model (GPT-Live) streams
+        // audio continuously, silence included; counting silence made every packet "first audio"
+        // (a fake ~300 ms latency) and made every caller utterance a barge-in.
+        if (EnergyVad.Dbfs(pcm8) < AudibleDbfs) return;
         _agentAudioQueued = true;
 
         if (_firstAudioThisResponse)

@@ -56,6 +56,13 @@ def mulaw_decode(byte: int) -> int:
     return -sample if u & 0x80 else sample
 
 
+def audible(ulaw: bytes, dbfs: float = -45.0) -> bool:
+    if not ulaw:
+        return False
+    rms = math.sqrt(sum(mulaw_decode(b) ** 2 for b in ulaw) / len(ulaw))
+    return rms > 32768 * 10 ** (dbfs / 20)
+
+
 def frames_of(samples: list[int]) -> list[str]:
     out = []
     for i in range(0, len(samples) - FRAME + 1, FRAME):
@@ -251,10 +258,14 @@ class ScriptedCall(TwilioSide):
                     start = max(self.playback_ends, now)
                     self.agent_track.append((start - self.t0, audio))
                     self.playback_ends = start + len(audio) / RATE
-                    self.last_media_at = now
-                    if self.first_media_after is None:
-                        self.first_media_after = now
-                        self.media_event.set()
+                    # Only AUDIBLE agent audio counts. A full-duplex model streams silence too, and
+                    # timing to the first packet of silence reports a latency nobody heard.
+                    if audible(audio):
+                        audible_at = start  # when the caller would actually hear it
+                        self.last_media_at = now
+                        if self.first_media_after is None:
+                            self.first_media_after = max(now, audible_at)
+                            self.media_event.set()
                 elif event == "clear":
                     self.playback_ends = now
                     self.clear_at = now
@@ -334,9 +345,12 @@ async def run_script(args: argparse.Namespace) -> None:
         })
         sender = asyncio.create_task(call.sender())
 
-        greeting = await call.wait_first_media(timeout=15)
-        print(f"greeting: first audio {1000 * (greeting - t_start):.0f} ms after stream start")
-        await call.agent_quiet()
+        try:
+            greeting = await call.wait_first_media(timeout=10)
+            print(f"greeting: first audio {1000 * (greeting - t_start):.0f} ms after stream start")
+            await call.agent_quiet()
+        except asyncio.TimeoutError:
+            print("greeting: none within 10 s; the caller speaks first")
 
         latencies = []
         for clip in clips:

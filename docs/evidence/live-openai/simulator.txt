@@ -1,0 +1,35 @@
+Traceback (most recent call last):
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 385, in <module>
+    main()
+  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 381, in main
+    asyncio.run(run_script(args) if args.script else run(args))
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 337, in run_script
+    greeting = await call.wait_first_media(timeout=15)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ariel\.claude\projects\voice-agent-dotnet/tools/simulate_call.py", line 139, in wait_first_media
+    await asyncio.wait_for(self.media_event.wait(), timeout)
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ariel\AppData\Local\Programs\Python\Python312\Lib\asyncio\timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
