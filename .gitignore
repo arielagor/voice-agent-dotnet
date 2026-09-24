@@ -1,0 +1,10 @@
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+node_modules/
+__pycache__/
+.venv/
+.env
+*.env.local
