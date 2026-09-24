@@ -80,6 +80,8 @@ public sealed class TracingChannel : IMessageChannel
             {
                 if (key is "audio" or "delta" or "data" or "payload" && obj[key] is JsonValue v && v.TryGetValue<string>(out var s) && s.Length > 64)
                     obj[key] = $"<{s.Length} b64 chars>";
+                else if (key == "encrypted_content")
+                    obj[key] = "<provider-encrypted reasoning elided>"; // opaque, useless in a trace, and not ours to publish
                 else
                     Elide(obj[key]);
             }

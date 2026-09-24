@@ -10,8 +10,8 @@ was used to test that design against four current voice models on the same call.
 against live models found eight defects. Three of them were also in the production line, and the
 fixes are now deployed there.
 
-Built by directing Claude Code. The design, the tests and the measurements are the author's
-responsibility; the C# is recent (September 2026), not years of it.
+Built with Claude Code in September 2026. The design, the tests and the measurements are the
+author's responsibility.
 
 ```
  caller ── PSTN ── Twilio ──WebSocket (8 kHz G.711 mu-law, 20 ms frames)──┐
@@ -24,6 +24,7 @@ responsibility; the C# is recent (September 2026), not years of it.
                      │ energy VAD → local barge-in (clear Twilio's buffer)          │
                      │ goodbye detection · booking-integrity flush · wrap-up timer  │
                      │ tools: RAG (BM25) · availability · booking · verify · PTP    │
+                     │ verbatim disclosures · read-back gate · call-frequency policy │
                      │ caller memory · latency metrics · per-turn timeline          │
                      └──────────────────────────────┬───────────────────────────────┘
                                                     ▼  IRealtimeConnector
@@ -54,6 +55,26 @@ enough to rank the models on this task and not enough to generalise beyond it. D
 `docs/evidence/benchmark.json`, per-run logs, raw provider traces and one recording per model in
 `docs/evidence/`.
 
+## Payment-reminder safeguards, in code
+
+A speech-to-speech model paraphrases, and an instruction in a prompt is a request. For a lender's
+reminder calls the rules that matter are enforced by the bridge instead:
+
+- **Verbatim disclosures.** The wording lives in `data/disclosures/*.txt` and is pre-rendered to
+  8 kHz mu-law (`tools/make_disclosures.py`). The bridge plays it itself and holds the model until
+  Twilio confirms, with a mark, that it finished; the model does not hear the caller meanwhile. A
+  recording notice opens every call; on payment reminders a servicing notice plays only after
+  `verify_account` succeeds, so nothing about the debt is said to anyone else.
+- **Call frequency and hours** (`OutboundCallPolicy`). At most 7 attempts per account in any 7
+  days, a 7-day quiet period after a verified conversation, and calls only between 8 a.m. and 9
+  p.m. in the consumer's local time. Checked before anything is dialled; refused calls get a 429
+  with the reason. Thresholds are configuration; a compliance team owns the numbers.
+- **Read-back before booking** (`ReadBackGate`). `book_appointment` refuses unless the agent has
+  read the callback number back (spoken digits count) and the caller has since said yes.
+- **Voicemail** gets a neutral callback request and no account detail.
+
+The disclosure wording in `data/disclosures` is illustrative for the demo business.
+
 ## What testing against live models found
 
 Each was fixed with a regression test. **P** marks the ones also present in the production line,
@@ -62,10 +83,10 @@ confirmed from its logs and fixed there.
 1. **P** The force-reply timer ("if the model commits the turn but says nothing, prompt it")
    answered turns that had already been answered. xAI creates the reply ~300 ms *before* it
    commits the turn, so "no reply active 700 ms after the commit" was the wrong question. The
-   production logs held 97 forced replies across ~70 calls, many seconds after a reply had just
-   finished, while the caller was still talking.
+   production logs held 97 forced replies across about 50 answered calls (most of them the
+   author's own test calls), 79 of them followed by caller speech within 1.5 s.
 2. **P** "Yes, that's all correct", a caller confirming a read-back, matched the goodbye pattern and
-   hung up a turn early.
+   would hang up a turn early. Found in the production line's code rather than its logs.
 3. xAI re-sends one utterance's transcript as it firms up, so the goodbye fired 3x per utterance.
 4. A streaming partial that stopped at "Yes, that's all" read as a goodbye on GPT-Live.
 5. **P** A redundant `response.cancel` after the provider's own interrupt failed with "no active
@@ -79,7 +100,7 @@ confirmed from its logs and fixed there.
 ## Run it
 
 ```bash
-dotnet test                                   # 116 tests: audio, VAD, protocol, tools, whole calls
+dotnet test                                   # 137 tests: audio, VAD, protocol, tools, safeguards, whole calls
 dotnet run --project src/VoiceAgent           # Development: scripted model, no key needed
 python tools/simulate_call.py --turns 3       # plays Twilio's side in real time, prints latencies
 

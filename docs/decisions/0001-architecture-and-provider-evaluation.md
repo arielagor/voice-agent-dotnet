@@ -25,9 +25,10 @@ call loop to ASP.NET Core 8 and uses the port to test the design against four cu
    goodbye detection and the booking-integrity check.
 
 4. **Two barge-in paths.** Server VAD needs a network round trip; the bridge's own VAD clears
-   Twilio's buffer three frames after the caller starts talking (27-29 ms at the bridge in
-   simulation). Whichever fires first wins; with `interrupt_response=true` the provider cancels
-   its own reply, so the server path does not send a second cancel.
+   Twilio's buffer after three voiced 20 ms frames (roughly 30 to 50 ms at the bridge in local
+   simulation; a real call cannot beat about 40 ms, since the frames arrive in real time).
+   Whichever fires first wins; with `interrupt_response=true` the provider cancels its own reply,
+   so the server path does not send a second cancel.
 
 5. **Measure what the caller hears.** Latency is end of caller speech to first AUDIBLE agent
    audio. Counting packets counted GPT-Live's continuous silence and reported a fake ~300 ms.
