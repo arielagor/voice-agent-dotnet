@@ -194,10 +194,15 @@ public class CallFlowTests : IAsyncLifetime
     {
         var (twilio, model) = await ConnectedCallAsync();
 
+        // The read-back and the caller's yes happen; the booking tool does not.
+        model.Push(new { type = "response.created" });
+        model.Push(new { type = "response.output_audio_transcript.delta", delta = "Jordan Reyes at 310-555-0142, is that right?" });
+        model.Push(new { type = "response.done" });
+        model.Push(new { type = "conversation.item.input_audio_transcription.completed", item_id = "item_yes", transcript = "Yes." });
         model.Push(new { type = "response.created" });
         model.Push(new { type = "response.output_audio_transcript.delta", delta = "Perfect, you're all set for ten tomorrow." });
         model.Push(new { type = "response.done" });
-        model.Push(new { type = "conversation.item.input_audio_transcription.completed", transcript = "Thanks, bye." });
+        model.Push(new { type = "conversation.item.input_audio_transcription.completed", item_id = "item_bye", transcript = "Thanks, bye." });
 
         await model.WaitForAsync("conversation.item.create", e =>
             e.GetProperty("item").GetProperty("type").GetString() == "message" &&

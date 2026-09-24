@@ -7,7 +7,7 @@ calls, memory, and latency you can measure.
 
 It is a port of the Node.js bridge behind a live AI phone line, **+1 (775) 252-8333**, and it
 was used to test that design against four current voice models on the same call. Testing it
-against live models found eight defects. Two of them were also in the production line, and the
+against live models found eight defects. Three of them were also in the production line, and the
 fixes are now deployed there.
 
 Built by directing Claude Code. The design, the tests and the measurements are the author's
@@ -31,7 +31,7 @@ responsibility; the C# is recent (September 2026), not years of it.
                                                    (* protocol adapters)
 ```
 
-## Which model? Measured, not assumed
+## Benchmark: which model?
 
 The same five-turn service call went through this bridge twice per provider. The caller was
 TTS speech sent as 8 kHz mu-law at real-time pace: a price question, availability for tomorrow,

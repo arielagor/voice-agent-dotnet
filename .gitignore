@@ -8,6 +8,7 @@ __pycache__/
 .venv/
 .env
 *.env.local
+*.tmp
 
 # Raw call recordings stay local; one MP3 per provider is kept under docs/evidence/recordings.
 docs/evidence/**/*.wav

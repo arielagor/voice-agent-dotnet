@@ -101,8 +101,9 @@ public sealed class BookAppointmentTool(AppointmentBook book) : IVoiceTool
 {
     public string Name => "book_appointment";
     public string Description =>
-        "Book an appointment. Only call after the caller has agreed to a specific open time and you have read " +
-        "their name and callback number back to them.";
+        "Book an appointment. Only call after the caller has agreed to a specific open time, you have read " +
+        "their name and callback number back to them, and they have said yes. The tool checks the read-back " +
+        "and refuses without it.";
     public JsonObject Parameters => new()
     {
         ["type"] = "object",
@@ -124,6 +125,12 @@ public sealed class BookAppointmentTool(AppointmentBook book) : IVoiceTool
 
         string department = args.Str("department")!.ToLowerInvariant();
         string name = args.Str("name")!;
+
+        // Enforced here, not in the prompt: the number was read back and the caller said yes.
+        var readBack = Compliance.ReadBackGate.Check(context.Transcript, args.Str("phone")!);
+        if (!readBack.Allowed)
+            return Task.FromResult<JsonNode>(ToolRegistry.Error(readBack.Reason!));
+
         if (!book.TryBook(department, start, name, out var eventId))
             return Task.FromResult<JsonNode>(ToolRegistry.Error("that time is not open; call check_availability and offer another"));
 

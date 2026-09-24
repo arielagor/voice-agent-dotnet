@@ -89,11 +89,6 @@ public class KnowledgeIndexTests
 
 public class DealerToolTests
 {
-    private sealed class FixedClock(DateTimeOffset now) : TimeProvider
-    {
-        public override DateTimeOffset GetUtcNow() => now;
-    }
-
     // Wednesday 2026-09-23, 09:00 Pacific
     private static readonly DateTimeOffset Now = new(2026, 9, 23, 16, 0, 0, TimeSpan.Zero);
     private readonly DemoBusiness _business = DemoBusiness.Load(BridgeFactory.RepoPath("data/demo-dealer.json"));
@@ -117,6 +112,7 @@ public class DealerToolTests
     [Fact]
     public async Task A_slot_cannot_be_booked_twice()
     {
+        _ctx.Transcript = ["agent: Jordan at three one oh, five five five, zero one four two, tomorrow at eleven. Correct?", "caller: Yes."];
         var tool = new BookAppointmentTool(Book);
         var args = Args(new { department = "sales", start = "2026-09-24T11:00", name = "Jordan", phone = "+13105550142" });
         Assert.True((await tool.InvokeAsync(args, _ctx, default))["success"]!.GetValue<bool>());

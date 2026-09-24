@@ -13,6 +13,9 @@ public sealed class ToolContext(string callId, string? callerNumber)
     public int FailedVerifications { get; set; }
     public string? CallerName { get; set; }
     public List<string> Outcomes { get; } = [];
+
+    /// <summary>The call so far ("agent: ..." / "caller: ..."), snapshotted when a tool is dispatched.</summary>
+    public IReadOnlyList<string> Transcript { get; set; } = [];
 }
 
 public interface IVoiceTool

@@ -103,7 +103,8 @@ public class WebhookTests : IAsyncLifetime
     {
         var client = _factory.CreateClient();
         client.DefaultRequestHeaders.Add("X-Api-Key", "test-api-key");
-        var response = await client.PostAsJsonAsync("/calls/outbound", new { to = "+13105550142", purpose = "payment_reminder" });
+        // Service reminders carry no account; payment reminders are covered by OutboundEndpointTests.
+        var response = await client.PostAsJsonAsync("/calls/outbound", new { to = "+13105550142", purpose = "service_reminder" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("CA_created_by_fake", await response.Content.ReadAsStringAsync());
@@ -113,7 +114,7 @@ public class WebhookTests : IAsyncLifetime
         Assert.Equal("Basic " + Convert.ToBase64String(Encoding.ASCII.GetBytes("AC_test:test-auth-token")), sent.Authorization);
         Assert.Equal("+13105550142", sent.Form["To"]);
         Assert.Equal("+13237466888", sent.Form["From"]);
-        Assert.Equal("https://voice.test/voice/outbound?purpose=payment_reminder", sent.Form["Url"]);
+        Assert.Equal("https://voice.test/voice/outbound?purpose=service_reminder", sent.Form["Url"]);
         Assert.Equal("Enable", sent.Form["MachineDetection"]);
     }
 

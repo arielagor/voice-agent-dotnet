@@ -14,6 +14,10 @@ public sealed class CallTokens(string secret)
     private readonly byte[] _key = Encoding.UTF8.GetBytes(
         string.IsNullOrWhiteSpace(secret) ? throw new ArgumentException("Call token secret is required.") : secret);
 
+    /// <summary>The purpose binding for a call: the purpose, plus the account an outbound call is about.</summary>
+    public static string PurposeKey(string purpose, string account) =>
+        account.Length > 0 ? $"{purpose}:{account}" : purpose;
+
     /// <summary>Binds the call, its direction, and (outbound) its purpose, so none can be swapped.</summary>
     public string Mint(string callSid, string direction, string purpose = "")
     {

@@ -1,6 +1,8 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Channels;
 using VoiceAgent.Audio;
+using VoiceAgent.Compliance;
 using VoiceAgent.Memory;
 using VoiceAgent.Metrics;
 using VoiceAgent.Realtime;
@@ -27,6 +29,8 @@ public sealed class CallSession(
     CallTokens tokens,
     AgentProfile agent,
     AppointmentBook appointments,
+    DisclosureLibrary disclosures,
+    OutboundCallPolicy outboundPolicy,
     RealtimeOptions realtime,
     CallOptions options,
     TimeProvider clock,
@@ -49,6 +53,11 @@ public sealed class CallSession(
     private bool _firstAudioThisResponse;
     private int _responsesAtTurnStart;
     private const double AudibleDbfs = -45.0;
+    private string _purpose = "";
+    private bool _disclosurePlaying;
+    private bool _greetingDeferred;
+    private int _disclosureGeneration;
+    private Func<Task>? _afterDisclosure;
     private (string Item, string Text) _lastCallerItem = ("", "");
     private readonly List<string> _pendingAudio = [];
     private CancellationToken _ct;
@@ -168,6 +177,7 @@ public sealed class CallSession(
             case "mark":
                 string? name = root.TryGetProperty("mark", out var mark) ? Str(mark, "name") : null;
                 if (name == "end-call" && _endRequested) await HangupWhenBookingSettledAsync("caller said goodbye");
+                else if (name is not null && name.StartsWith("disclosure-", StringComparison.Ordinal)) await OnDisclosurePlayedAsync(name);
                 else if (name is not null && name == _lastResponseMark) _agentAudioQueued = false;
                 break;
             case "stop":
@@ -183,8 +193,9 @@ public sealed class CallSession(
         string? callSid = Str(start, "callSid");
         string direction = Str(p, "dir") ?? "inbound";
         string purpose = Str(p, "purpose") ?? "";
+        string account = Str(p, "account") ?? "";
 
-        if (!tokens.Verify(Str(p, "t"), callSid, direction, purpose))
+        if (!tokens.Verify(Str(p, "t"), callSid, direction, CallTokens.PurposeKey(purpose, account)))
         {
             metrics.Increment("streams_rejected");
             log.LogWarning("[{Call}] media stream rejected: bad or missing call token", CallId);
@@ -194,9 +205,13 @@ public sealed class CallSession(
 
         _streamSid = Str(start, "streamSid") ?? Str(root, "streamSid");
         _from = Str(p, "from");
+        _purpose = purpose;
         _connectedAt = clock.GetUtcNow();
         _toolContext = new ToolContext(CallId, _from);
         metrics.Increment("calls_started");
+
+        // The recording notice goes first, verbatim, before the model says a word.
+        if (options.RecordingNotice) await PlayDisclosureAsync(DisclosureLibrary.RecordingNotice, then: null);
 
         string instructions = agent.BuildInstructions(direction, purpose, CallerMemoryStore.Preamble(memory.Find(_from)), appointments.LocalNow);
         try
@@ -219,6 +234,10 @@ public sealed class CallSession(
 
     private async Task OnCallerAudioAsync(byte[] muLaw)
     {
+        // While a verbatim disclosure plays, the caller is not heard by the model: it must not
+        // start answering (server VAD would) or be barged in on before the wording is complete.
+        if (_disclosurePlaying) return;
+
         var pcm8 = new short[muLaw.Length];
         MuLaw.Decode(muLaw, pcm8);
 
@@ -272,7 +291,8 @@ public sealed class CallSession(
                 _modelReady = true;
                 foreach (var frame in _pendingAudio) await SendModelAsync(RealtimeMessages.AppendAudio(frame));
                 _pendingAudio.Clear();
-                await SendModelAsync(RealtimeMessages.ResponseCreate()); // the agent speaks first
+                if (_disclosurePlaying) _greetingDeferred = true; // greet once the notice has played
+                else await SendModelAsync(RealtimeMessages.ResponseCreate()); // the agent speaks first
                 break;
 
             case "input_audio_buffer.speech_started":
@@ -502,6 +522,7 @@ public sealed class CallSession(
     {
         if (functionCallId is null || name is null || _toolContext is null) return;
         var context = _toolContext;
+        context.Transcript = _transcript.ToList(); // a snapshot: the tool runs off the call loop
         log.LogInformation("[{Call}] tool call {Tool}", CallId, name);
 
         // Off the call loop so audio keeps flowing while a tool waits on a network hop; one at a
@@ -535,13 +556,69 @@ public sealed class CallSession(
             else _bookingPromised = true; // an attempted booking is a promise to the caller
         }
 
+        // A verified payment-reminder conversation: record it (it starts the quiet period for
+        // further calls on the account) and play the servicing disclosure verbatim before the
+        // model continues, instead of trusting the model to say it.
+        bool verifiedReminder = r.Name == "verify_account" && _purpose == "payment_reminder"
+            && r.Output is JsonObject o && o["verified"] is JsonValue v && v.TryGetValue<bool>(out var ok) && ok;
+        if (verifiedReminder && r.Output["account_id"]?.GetValue<string>() is { } accountId)
+            outboundPolicy.RecordConversation(accountId);
+
         if (!_closed && _model is { IsOpen: true })
         {
             await SendModelAsync(RealtimeMessages.FunctionCallOutput(done.FunctionCallId, r.Output));
-            await SendModelAsync(RealtimeMessages.ResponseCreate());
+            if (verifiedReminder)
+                await PlayDisclosureAsync(DisclosureLibrary.ServicingNotice, then: () => SendModelAsync(RealtimeMessages.ResponseCreate()));
+            else
+                await SendModelAsync(RealtimeMessages.ResponseCreate());
         }
 
         if (_holdingForBooking && _bookingCommitted) Hangup($"{_holdReason} (booking flushed)");
+    }
+
+    // ---------------------------------------------------------------- Verbatim disclosures
+
+    /// <summary>
+    /// Plays pre-rendered wording to the caller and holds the model until Twilio confirms, with a
+    /// mark, that it finished. A timer covers a mark that never comes back.
+    /// </summary>
+    private async Task PlayDisclosureAsync(string name, Func<Task>? then)
+    {
+        if (_streamSid is null || !disclosures.TryGet(name, out _, out var audio))
+        {
+            if (then is not null) await then();
+            return;
+        }
+
+        _disclosurePlaying = true;
+        _afterDisclosure = then;
+        const int chunk = 1600; // 200 ms of 8 kHz mu-law per message
+        for (int i = 0; i < audio.Length; i += chunk)
+            await SendTwilioAsync(TwilioMessages.Media(_streamSid, Convert.ToBase64String(audio, i, Math.Min(chunk, audio.Length - i))));
+        await SendTwilioAsync(TwilioMessages.Mark(_streamSid, "disclosure-" + name));
+
+        _transcript.Add($"system: [played verbatim disclosure '{name}']");
+        metrics.Increment($"disclosure_{name}");
+        log.LogInformation("[{Call}] playing verbatim disclosure {Name} ({Seconds:F1} s)", CallId, name, audio.Length / 8000.0);
+        Schedule(TimeSpan.FromSeconds(audio.Length / 8000.0 + 3), "disclosure-timeout", ++_disclosureGeneration);
+    }
+
+    private async Task OnDisclosurePlayedAsync(string markName)
+    {
+        if (!_disclosurePlaying) return;
+        _disclosurePlaying = false;
+        _disclosureGeneration++;
+        log.LogInformation("[{Call}] disclosure finished ({Mark})", CallId, markName);
+
+        var then = _afterDisclosure;
+        _afterDisclosure = null;
+        if (then is not null) await then();
+
+        if (_greetingDeferred && _modelReady)
+        {
+            _greetingDeferred = false;
+            await SendModelAsync(RealtimeMessages.ResponseCreate());
+        }
     }
 
     // ---------------------------------------------------------------- Booking integrity + ending
@@ -606,6 +683,10 @@ public sealed class CallSession(
             case "end-fallback" when timer.Generation == _endFallbackGeneration && _endRequested:
                 await HangupWhenBookingSettledAsync("goodbye (playback timeout)");
                 break;
+            case "disclosure-timeout" when timer.Generation == _disclosureGeneration && _disclosurePlaying:
+                log.LogWarning("[{Call}] disclosure mark never echoed; continuing", CallId);
+                await OnDisclosurePlayedAsync("timeout");
+                break;
             case "booking-deadline" when _holdingForBooking:
                 Hangup($"{_holdReason} (booking flush timed out)");
                 break;
@@ -669,6 +750,13 @@ public sealed class CallSession(
                 _events.Writer.TryWrite(wrap(message));
         }
         catch (OperationCanceledException) { }
+        catch (Exception ex)
+        {
+            // A socket that dies mid-call still ends the call cleanly (the close event below),
+            // but the reason must not vanish with it.
+            metrics.Increment("socket_read_failures");
+            log.LogWarning(ex, "[{Call}] socket read failed", CallId);
+        }
         finally
         {
             _events.Writer.TryWrite(onClose);

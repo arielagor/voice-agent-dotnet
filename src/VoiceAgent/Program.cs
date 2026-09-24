@@ -1,5 +1,8 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Extensions.Options;
 using VoiceAgent.Calls;
+using VoiceAgent.Compliance;
 using VoiceAgent.Memory;
 using VoiceAgent.Metrics;
 using VoiceAgent.Realtime;
@@ -37,6 +40,11 @@ builder.Services.AddSingleton<IVoiceTool, VerifyAccountTool>();
 builder.Services.AddSingleton<IVoiceTool, RecordPromiseToPayTool>();
 builder.Services.AddSingleton<ToolRegistry>();
 
+builder.Services.Configure<OutboundPolicyOptions>(config.GetSection("Outbound"));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<OutboundPolicyOptions>>().Value);
+builder.Services.AddSingleton<OutboundCallPolicy>();
+builder.Services.AddSingleton(_ => new DisclosureLibrary(DataFile("disclosures")));
+
 builder.Services.AddSingleton(sp => WebSocketRealtimeConnector.For(sp.GetRequiredService<RealtimeOptions>()));
 builder.Services.AddHttpClient<TwilioRestClient>();
 
@@ -71,22 +79,35 @@ app.MapPost("/voice/outbound", async (HttpRequest request, DemoBusiness business
         return Results.Content(Twiml.Say($"Hello, this is a courtesy call from {business.BusinessName}. Please call us back at your convenience. Thank you."), "text/xml");
 
     string purpose = request.Query["purpose"].ToString();
-    return Results.Content(StreamTwiml(form["CallSid"].ToString(), "outbound", purpose, form["To"].ToString()), "text/xml");
+    string account = request.Query["account"].ToString();
+    return Results.Content(StreamTwiml(form["CallSid"].ToString(), "outbound", purpose, form["To"].ToString(), account), "text/xml");
 });
 
-// Place an outbound call (payment or service reminder). Internal callers only.
-app.MapPost("/calls/outbound", async (HttpRequest request, OutboundCallRequest body, TwilioRestClient twilioRest, CancellationToken ct) =>
+// Place an outbound call (payment or service reminder). Internal callers only. A payment
+// reminder is checked against the account's call-frequency and calling-hours policy before
+// anything is dialled, and every attempt is recorded against the account.
+app.MapPost("/calls/outbound", async (HttpRequest request, OutboundCallRequest body, TwilioRestClient twilioRest,
+    OutboundCallPolicy policy, DemoBusiness business, CancellationToken ct) =>
 {
     string? key = config["Security:ApiKey"];
-    if (string.IsNullOrEmpty(key) || request.Headers["X-Api-Key"] != key) return Results.Unauthorized();
+    if (string.IsNullOrEmpty(key) || !CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(request.Headers["X-Api-Key"].ToString()), Encoding.UTF8.GetBytes(key)))
+        return Results.Unauthorized();
     if (body.Purpose is not ("payment_reminder" or "service_reminder")) return Results.BadRequest(new { error = "unknown purpose" });
 
+    string account = body.AccountId ?? "";
+    if (body.Purpose == "payment_reminder")
+    {
+        if (!business.Accounts.Any(a => a.Id == account)) return Results.BadRequest(new { error = "a payment reminder needs a known accountId" });
+        // Demo: the consumer's zone is the business's. A deployment takes it from the account's address.
+        var decision = policy.Check(account, business.Zone);
+        if (!decision.Allowed) return Results.Json(new { error = "call not permitted", reason = decision.Reason }, statusCode: StatusCodes.Status429TooManyRequests);
+    }
+
     string baseUrl = twilioOptions.PublicBaseUrl.TrimEnd('/');
-    string sid = await twilioRest.CreateCallAsync(
-        body.To,
-        $"{baseUrl}/voice/outbound?purpose={Uri.EscapeDataString(body.Purpose)}",
-        $"{baseUrl}/voice/status",
-        ct);
+    string query = $"purpose={Uri.EscapeDataString(body.Purpose)}" + (account.Length > 0 ? $"&account={Uri.EscapeDataString(account)}" : "");
+    string sid = await twilioRest.CreateCallAsync(body.To, $"{baseUrl}/voice/outbound?{query}", $"{baseUrl}/voice/status", ct);
+    if (account.Length > 0) policy.RecordAttempt(account);
     return Results.Ok(new { callSid = sid });
 });
 
@@ -117,19 +138,20 @@ bool IsSignedByTwilio(HttpRequest request, IFormCollection form)
     return TwilioSignature.IsValid(twilioOptions.AuthToken, url, parameters, request.Headers["X-Twilio-Signature"]);
 }
 
-string StreamTwiml(string callSid, string direction, string purpose, string from)
+string StreamTwiml(string callSid, string direction, string purpose, string from, string account = "")
 {
     string wsUrl = twilioOptions.PublicBaseUrl.TrimEnd('/').Replace("https://", "wss://").Replace("http://", "ws://") + "/media";
     var parameters = new Dictionary<string, string>
     {
-        ["t"] = callTokens.Mint(callSid, direction, purpose),
+        ["t"] = callTokens.Mint(callSid, direction, CallTokens.PurposeKey(purpose, account)),
         ["dir"] = direction,
         ["from"] = from,
     };
     if (purpose.Length > 0) parameters["purpose"] = purpose;
+    if (account.Length > 0) parameters["account"] = account;
     return Twiml.ConnectStream(wsUrl, parameters);
 }
 
-public sealed record OutboundCallRequest(string To, string Purpose);
+public sealed record OutboundCallRequest(string To, string Purpose, string? AccountId = null);
 
 public partial class Program;

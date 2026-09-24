@@ -2,8 +2,10 @@ namespace VoiceAgent.Audio;
 
 /// <summary>
 /// ITU-T G.711 mu-law codec. Twilio Media Streams carry 8 kHz mono mu-law, base64 encoded,
-/// in 20 ms frames (160 bytes). The VAD needs linear PCM, so every inbound frame is decoded
-/// here before it is measured; audio forwarded to the model stays mu-law end to end.
+/// in 20 ms frames (160 bytes). The VAD needs linear PCM, so every inbound frame is decoded here
+/// before it is measured. Audio to the model is then resampled to 24 kHz PCM16, the path the
+/// production line uses, so the port and the line compare like for like. OpenAI and xAI also accept
+/// 8 kHz mu-law directly, which would skip both resamples; that is a measured trade-off left open.
 /// </summary>
 public static class MuLaw
 {

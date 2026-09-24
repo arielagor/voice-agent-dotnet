@@ -19,6 +19,9 @@ public sealed class CallOptions
     public int MaxPendingFrames { get; set; } = 500;
     public BargeInMode BargeIn { get; set; } = BargeInMode.Both;
 
+    /// <summary>Play the recorded-call notice, verbatim, before the model speaks.</summary>
+    public bool RecordingNotice { get; set; } = true;
+
     /// <summary>
     /// Extra margin a local barge-in needs over the turn VAD. On speakerphones the agent's own
     /// voice leaks back into the caller's microphone; the higher bar keeps it from interrupting itself.

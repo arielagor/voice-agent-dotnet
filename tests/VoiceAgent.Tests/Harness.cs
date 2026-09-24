@@ -118,15 +118,16 @@ public sealed class TwilioCall : IAsyncDisposable
     }
 
     public Task StartAsync(CallTokens tokens, string from = "+13105550142", string direction = "inbound",
-        string purpose = "", string? tokenOverride = null)
+        string purpose = "", string? tokenOverride = null, string account = "")
     {
         var parameters = new Dictionary<string, string>
         {
-            ["t"] = tokenOverride ?? tokens.Mint(CallSid, direction, purpose),
+            ["t"] = tokenOverride ?? tokens.Mint(CallSid, direction, CallTokens.PurposeKey(purpose, account)),
             ["dir"] = direction,
             ["from"] = from,
         };
         if (purpose.Length > 0) parameters["purpose"] = purpose;
+        if (account.Length > 0) parameters["account"] = account;
         return Send(new
         {
             @event = "start",
@@ -207,6 +208,7 @@ public sealed class BridgeFactory : WebApplicationFactory<Program>
         ["Twilio:PublicBaseUrl"] = "https://voice.test",
         ["Twilio:ValidateSignatures"] = "true",
         ["Calls:BookingFlushTimeoutMs"] = "400",
+        ["Calls:RecordingNotice"] = "false", // on in production; the disclosure tests turn it back on
         ["Calls:EndPlaybackTimeoutMs"] = "3000",
         ["Data:Directory"] = RepoPath("data"),
     };
@@ -232,6 +234,12 @@ public sealed class BridgeFactory : WebApplicationFactory<Program>
         while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "VoiceAgent.sln"))) dir = dir.Parent;
         return Path.Combine(dir?.FullName ?? throw new DirectoryNotFoundException("repo root"), relative);
     }
+}
+
+public sealed class FixedClock(DateTimeOffset now) : TimeProvider
+{
+    public DateTimeOffset Now { get; set; } = now;
+    public override DateTimeOffset GetUtcNow() => Now;
 }
 
 internal static class Pcm
