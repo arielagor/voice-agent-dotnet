@@ -50,6 +50,14 @@ def tts(text: str, voice: str, key: str) -> bytes:
 def main() -> None:
     import sys
     script, out = SCRIPTS[sys.argv[1] if len(sys.argv) > 1 else "service"]
+    # Hard stop on test spend (Ariel, 2026-10-18): rendering simulated-caller audio needs
+    # XAI_TEST_SPEND_OK from Ariel for this run. Only missing clips are rendered; a full
+    # script is a few hundred characters at $15/1M, so the floor of $0.01 covers it.
+    if any(not (out / f"{name}.mp3").exists() for name, _ in script):
+        guard = subprocess.run(["node", "C:/Users/ariel/.claude/scripts/lib/xai-test-guard.mjs",
+                                "--script", "voice-agent-dotnet/tools/make_caller_audio.py", "--estimate", "0.01"])
+        if guard.returncode != 0:
+            sys.exit(3)
     key = os.environ["XAI_API_KEY"]
     voice = os.environ.get("CALLER_VOICE", "ara")
     out.mkdir(exist_ok=True)

@@ -14,6 +14,12 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+if ($Provider -eq 'xai') {
+    # Hard stop on test spend (Ariel, 2026-10-18): a live xAI call needs XAI_TEST_SPEND_OK from
+    # Ariel for this run. One scripted five-turn call is ~2 min of realtime at $0.05/min.
+    & node 'C:/Users/ariel/.claude/scripts/lib/xai-test-guard.mjs' --script "voice-agent-dotnet/tools/live-call.ps1 -Name $Name" --estimate 0.10
+    if ($LASTEXITCODE -ne 0) { exit 3 }
+}
 $repo = Split-Path $PSScriptRoot -Parent
 $out = Join-Path $repo "docs/evidence/live-$Name"
 New-Item -ItemType Directory -Force $out | Out-Null
