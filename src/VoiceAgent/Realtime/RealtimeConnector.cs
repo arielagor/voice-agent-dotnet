@@ -12,10 +12,10 @@ public sealed class RealtimeOptions
     public string Url { get; set; } = "wss://api.x.ai/v1/realtime";
 
     /// <summary>
-    /// Pinned, not "latest": the alias was probed on the production line and still resolved to
-    /// the previous model, so an alias is not a trustworthy upgrade signal.
+    /// The grok-voice-latest alias (Grok Voice 3.0 since 2026-10-14; 2.0 is deprecated), so new
+    /// xAI voice releases land automatically (Ariel, 2026-10-21). Same $0.08/min as 2.0.
     /// </summary>
-    public string Model { get; set; } = "grok-voice-think-fast-2.0";
+    public string Model { get; set; } = "grok-voice-latest";
     public string ApiKey { get; set; } = "";
     public string Voice { get; set; } = "Leo";
     public string TranscriptionModel { get; set; } = "grok-2-audio";
